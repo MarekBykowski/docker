@@ -78,13 +78,13 @@ build() {
 
 run() {
 	CONTAINER=great_day_${USER}
-	container_state 
+	container_state $CONTAINER
 	rc=$?
 	log debug "container_state rc $rc"
 	case ${rc} in
 	0)
 		log info "Container $CONTAINER is running"
-		#docker exec -it $CONTAINER /bin/bash
+		docker exec -it $CONTAINER /bin/bash
 		;;
 	1)
 		log info "Container $CONTAINER is restarting"
