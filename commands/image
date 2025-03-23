@@ -69,13 +69,11 @@ build() {
 
 	log info "docker build --no-cache $args \
  --build-arg username=${_USER} --build-arg gid=$(id -g) --build-arg uid=$(id -u) \
- --build-arg password=${_PASSWORD} -t ${_IMAGE} ${PWD}/docker 2>&1 |tee docker_build.log"
-	:<<-EOC
+ --build-arg password=${_PASSWORD} -t ${_IMAGE} ${PWD}/docker 2>&1 |tee logfile"
+
 	docker build --no-cache ${arg} \
 	--build-arg username=${_USER} --build-arg gid=$(id -g) --build-arg uid=$(id -u) \
 	--build-arg password=${_PASSWORD} -t ${_IMAGE} ${PWD}/docker 2>&1 | tee logfile
-	EOC
-
 }
 
 run() {
@@ -91,18 +89,15 @@ run() {
 	1)
 		log info "Container $CONTAINER is restarting"
 		;;
-	2)
-		log info "Container $CONTAINER is not running"
-		#docker run --name $CONTAINER --rm -it \
-	#		--env HTTP_PROXY==http://proxy-us.intel.com:911 \
-	#		--env HTTPS_PROXY=http://proxy-us.intel.com:912 \
-#			-v $HOME:$HOME/host --privileged ${_IMAGE}
-		;;
-	3)
-		log info "Container $CONTAINER doesn't exist"
+	2|3)
+		log info "Container $CONTAINER is either not running or exist"
+		docker run --name $CONTAINER --rm -it \
+			--env HTTP_PROXY==http://proxy-us.intel.com:911 \
+			--env HTTPS_PROXY=http://proxy-us.intel.com:912 \
+			-v $HOME:$HOME/host --privileged ${_IMAGE}
 		;;
 	*)
-		log info "Container $CONTAINER doesn't exist"
+		log info "Container $CONTAINER in unknown state"
 		exit
 		;;
 	esac
