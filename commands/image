@@ -5,6 +5,7 @@ _VERBOSE=1
 _RUN=""
 _BUILD=""
 _USER=""
+_LOGFILE=""
 _PASSWORD=password
 _IMAGE="ubuntu:20.04-rc0.0"
 
@@ -46,15 +47,21 @@ while [[ : ]]; do
         esac
 done
 
+
 if [[ $1 == build ]]; then
 	_BUILD=true
 elif [[ $1 == run ]]; then
 	_RUN=true
 fi
 
-log debug "params: --run $_RUN --build $_BUILD --user $_USER --password $_PASSWORD"
+# ${var:-word} means if var is defined AND NOT EMPTY, use var; otherwise, "word"
+log debug "params: --run ${_RUN:-false} --build ${_BUILD:-false} --user $_USER --password $_PASSWORD"
 log debug "Remaining arguments: $@"
 
+# Update VARs post parsing them them
+[[ _RUN == true ]] && _OP=run || _OP=build
+_LOGFILE=${_OP}-${_USER}-$(date +%s).log
+_IMAGE=${USER}-${_IMAGE}
 
 # Test what state the container is in, eg. running, non-existent, etc.
 container_state() {
@@ -62,18 +69,31 @@ container_state() {
 	return $rc
 }
 
+test_if_image_already_exist() {
+	docker image inspect ${_IMAGE} > /dev/null 2>&1
+	rc=$?
+	return $rc
+}
+
 build() {
 	#log debug "${FUNCNAME[0]}"
 
+	if test_if_image_already_exist; then
+		#image exists
+		log crit "Image ${_IMAGE} exists. Remove this one before creating a new one!"
+		exit 1
+	fi
+
 	[[ $_VERBOSE -eq 2 ]] && args="--progress=plain" || args="--progress=quiet"
+	args=--progress=plain
 
 	log info "docker build --no-cache $args \
  --build-arg username=${_USER} --build-arg gid=$(id -g) --build-arg uid=$(id -u) \
- --build-arg password=${_PASSWORD} -t ${_IMAGE} ${PWD}/docker 2>&1 |tee logfile"
+ --build-arg password=${_PASSWORD} -t ${_IMAGE} ~/docker 2>&1 |tee ${_LOGFILE}" | tee ${_LOGFILE}
 
-	docker build --no-cache ${arg} \
+	docker --debug build --no-cache ${arg} \
 	--build-arg username=${_USER} --build-arg gid=$(id -g) --build-arg uid=$(id -u) \
-	--build-arg password=${_PASSWORD} -t ${_IMAGE} ${PWD}/docker 2>&1 | tee logfile
+	--build-arg password=${_PASSWORD} -t ${_IMAGE} ~/docker 2>&1 | tee -a ${_LOGFILE}
 }
 
 run() {
@@ -90,7 +110,7 @@ run() {
 		log info "Container $CONTAINER is restarting"
 		;;
 	2|3)
-		log info "Container $CONTAINER is either not running or exist"
+		log info "Container $CONTAINER is neither running nor exist"
 		docker run --name $CONTAINER --rm -it \
 			--env HTTP_PROXY==http://proxy-us.intel.com:911 \
 			--env HTTPS_PROXY=http://proxy-us.intel.com:912 \

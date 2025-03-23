@@ -39,5 +39,6 @@ _autocomplete() {
 	esac
 }
 
-dir=$(dirname -- "$0")
-complete -o nospace -F _autocomplete ${dir}/image
+#dir=$( dirname "$(readlink -f "${BASH_SOURCE[-1]}")" )
+# `image` file should be in $PATH
+complete -o nospace -F _autocomplete image

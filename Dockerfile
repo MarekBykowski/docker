@@ -23,8 +23,6 @@ echo "${username}:${password}" | chpasswd
 EOF
 
 COPY apt.conf /etc/apt/
-COPY .bash_aliases /home/${username}
-COPY core-image-cxl-sdk-cxlx86-64.rootfs.wic.qcow2 /home/${username}
 
 RUN <<EOF
 apt-get -y update
@@ -42,6 +40,9 @@ apt-get -y install libglib2.0-0
 apt-get -y install dc time libelf1
 EOF
 
+# in .bash_aliases I put MOTD and the other is a sample qcow
+COPY .bash_aliases /home/${username}
+COPY core-image-cxl-sdk-cxlx86-64.rootfs.wic.qcow2 /home/${username}
 # install gh
 COPY gh_2.69.0_linux_amd64.deb /home/${username}
 RUN dpkg -i /home/${username}/gh_2.69.0_linux_amd64.deb
@@ -56,7 +57,8 @@ COPY apciexactor-2.5c.cxl.tar.gz aqcxl_sim-2023_1215.tar.gz \
   verdi.tar.gz vcsmx.tar.gz /tmp
 RUN for f in /tmp/*tar.gz; do tar -xzf $f -C /home/${username}/avery/2023_1215 && rm $f; done
 RUN unzip /tmp/avery_qemu-docker.zip -d /home/${username}/avery/2023_1215
-RUN chown -R ${username}:${username} /home/${username}
+
+RUN chown -v -R ${username}:${username} /home/${username}
 
 WORKDIR /home/${username}
 
