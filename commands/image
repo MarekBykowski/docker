@@ -1,0 +1,115 @@
+#!/bin/bash
+
+_DIRNAME=$(dirname -- "$0")
+_VERBOSE=1
+_RUN=""
+_BUILD=""
+_USER=""
+_PASSWORD=password
+_IMAGE="ubuntu:20.04-rc0.0"
+
+# Instead of echo use `log <crit|info|debug> "mseg"`
+# setting verosity `_VERBOSE` to the desired level.
+declare -A LOG_LEVELS
+LOG_LEVELS=([crit]=0 [info]=1 [debug]=2)
+function log () {
+	local LEVEL=${1}
+	shift
+	if [ ${_VERBOSE} -ge ${LOG_LEVELS[$LEVEL]} ]; then
+		echo ${LEVEL}: "$@"
+	fi
+}
+
+usage() {
+	cat <<- EOF
+	To build image run:
+		image build --user <username> --password <password>
+	To run image:
+		image run
+	EOF
+	exit 1
+}
+
+opts=$(getopt -o rbu:p:h --long run,build,user:,password:,help -n $0 -- "$@")
+
+# set positional parameters
+eval set -- "$opts"
+
+while [[ : ]]; do
+        case "$1" in
+                -r | --run) _RUN=true; shift 1 ;;
+                -b | --build) _BUILD=true; shift 1 ;;
+                -u | --user) _USER=$2; shift 2 ;;
+                -p | --password) _PASSWORD=$2; shift 2 ;;
+		-h | --help) usage; shift ;;
+                --) shift; break ;;
+        esac
+done
+
+if [[ $1 == build ]]; then
+	_BUILD=true
+elif [[ $1 == run ]]; then
+	_RUN=true
+fi
+
+log debug "params: --run $_RUN --build $_BUILD --user $_USER --password $_PASSWORD"
+log debug "Remaining arguments: $@"
+
+
+# Test what state the container is in, eg. running, non-existent, etc.
+container_state() {
+	rc=$(${_DIRNAME}/check_docker_container.sh $1)
+	return $rc
+}
+
+build() {
+	#log debug "${FUNCNAME[0]}"
+
+	[[ $_VERBOSE -eq 2 ]] && args="--progress=plain" || args="--progress=quiet"
+
+	log info "docker build --no-cache $args \
+ --build-arg username=${_USER} --build-arg gid=$(id -g) --build-arg uid=$(id -u) \
+ --build-arg password=${_PASSWORD} -t ${_IMAGE} ${PWD}/docker 2>&1 |tee docker_build.log"
+	:<<-EOC
+	docker build --no-cache ${arg} \
+	--build-arg username=${_USER} --build-arg gid=$(id -g) --build-arg uid=$(id -u) \
+	--build-arg password=${_PASSWORD} -t ${_IMAGE} ${PWD}/docker 2>&1 | tee logfile
+	EOC
+
+}
+
+run() {
+	CONTAINER=great_day_${USER}
+	container_state 
+	rc=$?
+	log debug "container_state rc $rc"
+	case ${rc} in
+	0)
+		log info "Container $CONTAINER is running"
+		#docker exec -it $CONTAINER /bin/bash
+		;;
+	1)
+		log info "Container $CONTAINER is restarting"
+		;;
+	2)
+		log info "Container $CONTAINER is not running"
+		#docker run --name $CONTAINER --rm -it \
+	#		--env HTTP_PROXY==http://proxy-us.intel.com:911 \
+	#		--env HTTPS_PROXY=http://proxy-us.intel.com:912 \
+#			-v $HOME:$HOME/host --privileged ${_IMAGE}
+		;;
+	3)
+		log info "Container $CONTAINER doesn't exist"
+		;;
+	*)
+		log info "Container $CONTAINER doesn't exist"
+		exit
+		;;
+	esac
+}
+
+if [[ $_BUILD == true ]]; then
+	build --user $_USER --password $_PASSWORD
+elif [[ $_RUN == true ]]; then
+	run
+fi

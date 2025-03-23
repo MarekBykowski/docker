@@ -1,0 +1,39 @@
+#!/bin/bash
+
+build() {
+	./image_build.sh -u kot -p p1
+}
+
+help_image_build() {
+cat << 'EOF'
+cd 1-docker #with Dockerfile
+docker build -t ubuntu:22.04 .
+# where:
+#`-t` is tag
+#`.` is the path where Dockerfile is
+EOF
+}
+
+help_image_update() {
+cat << 'EOF'
+#### Terminal 1 ####
+# run docker
+$ docker run --rm -it -v $HOME:$HOME ubuntu:22.04
+<update, eg. sudo apt-get install vim>
+
+
+#### Terminal 2 ####
+$ docker ps
+CONTAINER ID   IMAGE          COMMAND       CREATED         STATUS         PORTS
+3cdaaa4f736d   ubuntu:22.04   "/bin/bash"   5 minutes ago   Up 5 minutes
+
+$ docker container commit -m "Add vim" 3cdaaa4f736d ubuntu:22.04
+$ docker image history ubuntu:22.04
+IMAGE          CREATED          CREATED BY               SIZE      COMMENT
+33cfea9b3881   5 minutes ago    /bin/bash                401MB     Add vim
+
+#### Terminal 1 ####
+$ exit
+EOF
+}
+
