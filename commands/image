@@ -4,6 +4,7 @@ _DIRNAME=$(dirname -- "$0")
 _VERBOSE=1
 _RUN=""
 _BUILD=""
+_COMMIT=""
 _USER=""
 _LOGFILE=""
 _PASSWORD=password
@@ -52,6 +53,8 @@ if [[ $1 == build ]]; then
 	_BUILD=true
 elif [[ $1 == run ]]; then
 	_RUN=true
+elif [[ $1 == commit ]]; then
+	_COMMIT=true
 fi
 
 # ${var:-word} means if var is defined AND NOT EMPTY, use var; otherwise, "word"
@@ -87,44 +90,64 @@ build() {
 	[[ $_VERBOSE -eq 2 ]] && args="--progress=plain" || args="--progress=quiet"
 	args=--progress=plain
 
-	log info "docker build --no-cache $args \
+	[[ : ]] && _CACHE="" || _CACHE="--no-cache"
+
+	log info "docker build ${_CACHE} $args \
  --build-arg username=${_USER} --build-arg gid=$(id -g) --build-arg uid=$(id -u) \
  --build-arg password=${_PASSWORD} -t ${_IMAGE} ~/docker 2>&1 |tee ${_LOGFILE}" | tee ${_LOGFILE}
 
-	docker --debug build --no-cache ${arg} \
+	# --no-cache - slow but saves space
+	docker --debug build ${_CACHE} ${arg} \
 	--build-arg username=${_USER} --build-arg gid=$(id -g) --build-arg uid=$(id -u) \
 	--build-arg password=${_PASSWORD} -t ${_IMAGE} ~/docker 2>&1 | tee -a ${_LOGFILE}
 }
 
 run() {
-	CONTAINER=great_day_${USER}
-	container_state $CONTAINER
+	local CONTAINER_NAME=great_day_${USER}
+	container_state $CONTAINER_NAME
 	rc=$?
 	log debug "container_state rc $rc"
 	case ${rc} in
 	0)
-		log info "Container $CONTAINER is running"
-		docker exec -it $CONTAINER /bin/bash
+		log info "Container $CONTAINER_NAME is running"
+		docker exec -it $CONTAINER_NAME /bin/bash
 		;;
 	1)
-		log info "Container $CONTAINER is restarting"
+		log info "Container $CONTAINER_NAME is restarting"
 		;;
 	2|3)
-		log info "Container $CONTAINER is neither running nor exist"
-		docker run --name $CONTAINER --rm -it \
+		log info "Container $CONTAINER_NAME is neither running nor exist"
+		docker run --name $CONTAINER_NAME --rm -it \
 			--env HTTP_PROXY==http://proxy-us.intel.com:911 \
 			--env HTTPS_PROXY=http://proxy-us.intel.com:912 \
 			-v $HOME:$HOME/host --privileged ${_IMAGE}
 		;;
 	*)
-		log info "Container $CONTAINER in unknown state"
+		log info "Container $CONTAINER_NAME in unknown state"
 		exit
 		;;
 	esac
+}
+
+commit() {
+	local CONTAINER_NAME=great_day_${USER}
+	local CONTAINER_ID=$(docker ps --filter "name=${CONTAINER_NAME}" --format "{{.ID}}")
+	local MSG=Update-$(date +%s)
+
+	log info "docker diff ${CONTAINER_ID}"
+	docker diff ${CONTAINER_ID} |head -n 2
+
+	log info "docker commit -m ${MSG} ${CONTAINER_ID} ${_IMAGE}"
+	docker commit -m "${MSG}" ${CONTAINER_ID} ${_IMAGE}
+
+	log info "docker image history ${_IMAGE}"
+	docker image history ${_IMAGE}|head -n 2
 }
 
 if [[ $_BUILD == true ]]; then
 	build --user $_USER --password $_PASSWORD
 elif [[ $_RUN == true ]]; then
 	run
+elif [[ $_COMMIT == true ]]; then
+	commit
 fi

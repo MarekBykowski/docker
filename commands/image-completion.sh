@@ -18,7 +18,7 @@ _autocomplete() {
 
 	case ${COMP_CWORD} in
 	1)
-		COMPREPLY=($(compgen -W "build run" -- ${cur}))
+		COMPREPLY=($(compgen -W "build run commit" -- ${cur}))
 		;;
 	2)
 		if [[ ${prev} =~ build ]]; then
