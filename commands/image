@@ -19,7 +19,7 @@ function log () {
 	local LEVEL=${1}
 	shift
 	if [ ${_VERBOSE} -ge ${LOG_LEVELS[$LEVEL]} ]; then
-		echo ${LEVEL}: "$@"
+		echo -e "${LEVEL}: $@"
 	fi
 }
 
@@ -84,7 +84,8 @@ build() {
 
 	if test_if_image_already_exist; then
 		#image exists
-		log crit "Image ${_IMAGE} exists. Remove this one before creating a new one!"
+		log crit "Image ${_IMAGE} exists. Remove it before creating a new one!"
+		log crit "\t\`docker rmi ${_IMAGE}\`"
 		exit 1
 	fi
 
