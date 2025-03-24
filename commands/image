@@ -1,6 +1,7 @@
 #!/bin/bash
 
 _DIRNAME=$(dirname -- "$0")
+# verbose goes 0- crit, 1-info, 2-debug
 _VERBOSE=1
 _RUN=""
 _BUILD=""

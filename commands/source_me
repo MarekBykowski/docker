@@ -1,9 +1,5 @@
 #!/bin/bash
 
-build() {
-	./image_build.sh -u kot -p p1
-}
-
 help_image_build() {
 cat << 'EOF'
 cd 1-docker #with Dockerfile
@@ -11,29 +7,6 @@ docker build -t ubuntu:22.04 .
 # where:
 #`-t` is tag
 #`.` is the path where Dockerfile is
-EOF
-}
-
-help_image_update() {
-cat << 'EOF'
-#### Terminal 1 ####
-# run docker
-$ docker run --rm -it -v $HOME:$HOME ubuntu:22.04
-<update, eg. sudo apt-get install vim>
-
-
-#### Terminal 2 ####
-$ docker ps
-CONTAINER ID   IMAGE          COMMAND       CREATED         STATUS         PORTS
-3cdaaa4f736d   ubuntu:22.04   "/bin/bash"   5 minutes ago   Up 5 minutes
-
-$ docker container commit -m "Add vim" 3cdaaa4f736d ubuntu:22.04
-$ docker image history ubuntu:22.04
-IMAGE          CREATED          CREATED BY               SIZE      COMMENT
-33cfea9b3881   5 minutes ago    /bin/bash                401MB     Add vim
-
-#### Terminal 1 ####
-$ exit
 EOF
 }
 
@@ -50,15 +23,15 @@ docker system prune
 EOF
 }
 
-help_update_image() {
+help_image_update() {
 cat << 'EOF'
 ### Update image
 
 Updating `image` is more a flow than running a single command.
 
 When you update the `image` and exit the `container` you would lose all the date changed.
-To prevent from it you have to commit the changes before exiting the container. To do so open
-another terminal while docker is running and
+To prevent from it you have to commit the changes before exiting the container.
+While docker is running Open up another and
 
 [mbykowsx@GNR-JF04-5350 commands]$ docker ps                                                                                  
 CONTAINER ID   IMAGE                         COMMAND       CREATED          STATUS          PORTS     NAMES                   
@@ -83,4 +56,3 @@ REPOSITORY             TAG           IMAGE ID       CREATED         SIZE
 mbykowsx-ubuntu        20.04-rc0.0   7669efdd3601   6 seconds ago   75.1GB                                                    
 EOF
 }
-
