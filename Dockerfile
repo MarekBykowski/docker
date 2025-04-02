@@ -8,6 +8,14 @@ ARG password
 # Ubuntu doesn't set this var and without it avery qemu fails
 ENV USER=${username}
 
+# apt.conf contains proxy for apt-get
+COPY apt.conf /etc/apt/
+
+# set `build` proxy. Note when `run` we set proxy as well.
+#ENV env | grep -i _PROXY
+ENV HTTPS_PROXY=http://proxy-us.intel.com:912
+ENV HTTP_PROXY=http://proxy-us.intel.com:911
+
 # supress dialogue when installing tzdata
 ENV TZ=Europe/Warsaw
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
@@ -22,44 +30,83 @@ usermod -a -G kvm ${username}
 echo "${username}:${password}" | chpasswd
 EOF
 
-COPY apt.conf /etc/apt/
+RUN id ${uid}
 
 RUN <<EOF
-apt-get -y update
-apt-get -y install build-essential chrpath cpio debianutils diffstat file gawk \
-  gcc iputils-ping libacl1 liblz4-tool python3 python3-git locales \
-  python3-jinja2 python3-pexpect python3-pip python3-subunit socat texinfo unzip \
-  wget xz-utils zstd
-apt-get -y install sudo vim tmux gzip unzip git
-apt-get -y install git
-apt-get -y install cpu-checker
-apt-get -y install perl libterm-readkey-perl
-apt-get -y install libpixman-1-0 libpixman-1-dev
-apt-get -y install libglib2.0-0
-#required from sv
-apt-get -y install dc time libelf1
+apt-get -y update && apt-get install -y --no-install-recommends \
+  build-essential \
+  chrpath \
+  cpio \
+  debianutils \
+  diffstat \
+  file \
+  gawk \
+  gcc \
+  iproute2 \
+  iputils-ping \
+  libacl1 \
+  liblz4-tool \
+  openssh-client \
+  python3 \
+  python3-git \
+  locales \
+  python3-jinja2 \
+  python3-pexpect \
+  python3-pip \
+  python3-subunit \
+  socat \
+  texinfo \
+  unzip \
+  wget \
+  xz-utils \
+  zstd && \
+apt-get -y install sudo \
+  vim \
+  tmux \
+  gzip \
+  git \
+  cpu-checker \
+  perl \
+  libterm-readkey-perl \
+  libpixman-1-0 \
+  libpixman-1-dev \
+  libglib2.0-0
 EOF
-
-# in .bash_aliases I put MOTD and the other is a sample qcow
-COPY .bash_aliases /home/${username}
-COPY core-image-cxl-sdk-cxlx86-64.rootfs.wic.qcow2 /home/${username}
-# install gh
-COPY gh_2.69.0_linux_amd64.deb /home/${username}
-RUN dpkg -i /home/${username}/gh_2.69.0_linux_amd64.deb
 
 # make /bin/sh symlink to bash instead of dash:
 RUN echo "dash dash/sh boolean false" | debconf-set-selections
 RUN DEBIAN_FRONTEND=noninteractive dpkg-reconfigure dash
 
-RUN mkdir -p /home/${username}/avery/2023_1215
-COPY apciexactor-2.5c.cxl.tar.gz aqcxl_sim-2023_1215.tar.gz \
-  avery_pli-2023_1128.tar.gz avery_qemu-docker.zip \
-  verdi.tar.gz vcsmx.tar.gz /tmp
-RUN for f in /tmp/*tar.gz; do tar -xzf $f -C /home/${username}/avery/2023_1215 && rm $f; done
-RUN unzip /tmp/avery_qemu-docker.zip -d /home/${username}/avery/2023_1215
+# Set the locale
+RUN sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && \
+    locale-gen
+ENV LANG en_US.UTF-8
+ENV LANGUAGE en_US:en
+ENV LC_ALL en_US.UTF-8
 
-RUN chown -v -R ${username}:${username} /home/${username}
+# install gh cli
+WORKDIR /home/${username}
+COPY gh_2.69.0_linux_amd64.deb ./
+RUN dpkg -i gh_2.69.0_linux_amd64.deb
+RUN cat /etc/passwd
+USER ${username}
+COPY mytoken.txt .gitconfig ./
+RUN gh auth login --with-token < mytoken.txt
+
+# copy my tmux and vim confs
+RUN git clone https://github.com/MarekBykowski/readme.git
+RUN sh -c "cd readme; ./run.sh"
+
+# in .bash_aliases I do not yet put anything yet
+COPY .bash_aliases ./
+
+WORKDIR /home/${username}/yocto
+RUN id && cat ~/.gitconfig
+RUN git clone --branch nanbield https://github.com/MarekBykowski/meta-cxl.git
+RUN git clone --branch nanbield https://github.com/MarekBykowski/poky.git
+RUN git clone https://github.com/openembedded/meta-openembedded.git && \
+    cd meta-openembedded; git checkout -b nanbield --track origin/nanbield
+
+#RUN chown -R ${username}:${username} /home/${username}
 
 WORKDIR /home/${username}
-
-USER ${username}
