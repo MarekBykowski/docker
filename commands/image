@@ -3,6 +3,7 @@
 _DIRNAME=$(dirname -- "$0")
 # verbose goes 0- crit, 1-info, 2-debug
 _VERBOSE=1
+_DRY_RUN=false
 _RUN=""
 _BUILD=""
 _COMMIT=""
@@ -94,9 +95,9 @@ build() {
 
 	[[ : ]] && _CACHE="" || _CACHE="--no-cache"
 
-	log info "docker build ${_CACHE} $args \
+	log info "running: \`docker build ${_CACHE} $args \
  --build-arg username=${_USER} --build-arg gid=$(id -g) --build-arg uid=$(id -u) \
- --build-arg password=${_PASSWORD} -t ${_IMAGE} ~/docker 2>&1 |tee ${_LOGFILE}" | tee ${_LOGFILE}
+ --build-arg password=${_PASSWORD} -t ${_IMAGE} ~/docker 2>&1\`" | tee ${_LOGFILE}
 
 	# --no-cache - slow but saves space
 	docker --debug build ${_CACHE} ${arg} \
@@ -112,6 +113,7 @@ run() {
 	case ${rc} in
 	0)
 		log info "Container $CONTAINER_NAME is running"
+		log info "running \`docker exec -it $CONTAINER_NAME /bin/bash\`"
 		docker exec -it $CONTAINER_NAME /bin/bash
 		;;
 	1)
@@ -119,6 +121,11 @@ run() {
 		;;
 	2|3)
 		log info "Container $CONTAINER_NAME is neither running nor exist"
+		log info "running \`docker run --name $CONTAINER_NAME --rm -it \
+ --env HTTP_PROXY==http://proxy-us.intel.com:911 \
+ --env HTTPS_PROXY=http://proxy-us.intel.com:912 \
+ -v $HOME:$HOME/host --privileged ${_IMAGE}\`"
+
 		docker run --name $CONTAINER_NAME --rm -it \
 			--env HTTP_PROXY==http://proxy-us.intel.com:911 \
 			--env HTTPS_PROXY=http://proxy-us.intel.com:912 \

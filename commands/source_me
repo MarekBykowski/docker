@@ -1,5 +1,13 @@
 #!/bin/bash
 
+hi_wrapup_commands() {
+cat << 'EOF'
+image build --user=<user> --password=<password>
+image run
+image commit
+EOF
+}
+
 hi_build() {
 cat << 'EOF'
 cd 1-docker #with Dockerfile
