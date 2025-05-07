@@ -1,5 +1,12 @@
 #!/bin/bash
 
+#hi - help image
+hi_run_yocto_image() {
+cat << 'EOF'
+docker run --rm -it -p 2222:22  --env HTTP_PROXY==http://proxy-us.intel.com:911  --env HTTPS_PROXY=http://proxy-us.intel.com:912  --privileged  marekbykowski/yocto-qemu-simics:nanbield-rc0.1
+EOF
+}
+
 hi_wrapup_commands() {
 cat << 'EOF'
 image build --user=<user> --password=<password>
@@ -64,3 +71,12 @@ REPOSITORY             TAG           IMAGE ID       CREATED         SIZE
 mbykowsx-ubuntu        20.04-rc0.0   7669efdd3601   6 seconds ago   75.1GB
 EOF
 }
+
+
+hi_run() {
+cat << 'EOF'
+docker run --name great_day_mbykowsx --rm -it  --env HTTP_PROXY==http://proxy-us.intel.com:911  --env HTTPS_PROXY=http://proxy-us.intel.com:912  -v /home/mbykowsx:/home/mbykowsx/host --privileged <image:tag>
+EOF
+}
+
+echo "run hi_wrapup_commands"
