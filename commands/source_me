@@ -10,11 +10,11 @@ EOF
 hi_run_image() {
 cat << 'EOF'
 # detch (-d) with terminal (-t), keep alive (-i), then ssh
-docker run --rm -it -d -p 6666:22 --env HTTP_PROXY=http://proxy-us.intel.com:911 --env HTTPS_PROXY=http://proxy-us.intel.com:912 --privileged marekbykowski/yocto-qemu-simics:nanbield-rc0.0
+docker run --rm -it -d -p 6666:22 --privileged marekbykowski/yocto-qemu-simics:nanbield-rc0.0
 # same but do not detach, will prompt to terminal
-docker run --rm -it -p 6666:22 --env HTTP_PROXY=http://proxy-us.intel.com:911 --env HTTPS_PROXY=http://proxy-us.intel.com:912 --privileged marekbykowski/yocto-qemu-simics:nanbield-rc0.0
+docker run --rm -it -p 6666:22 --privileged marekbykowski/yocto-qemu-simics:nanbield-rc0.0
 # with vnc there is a supervised command, ctrl+c to exit the image
-docker run --rm -p 6666:22 -p 6667:5900 --env HTTP_PROXY=http://proxy-us.intel.com:911 --env HTTPS_PROXY=http://proxy-us.intel.com:912 --privileged marekbykowski/ubuntu-vnc:22.04
+docker run --rm -p 6666:22 -p 6667:5900 --privileged marekbykowski/ubuntu-vnc:22.04
 EOF
 }
 
