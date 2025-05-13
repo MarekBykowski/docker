@@ -14,6 +14,7 @@ RUN export DEBIAN_FRONTEND=noninteractive  \
 	apt-utils sudo supervisor vim openssh-server \
 	xserver-xorg xvfb x11vnc dbus-x11 \
 	xfce4 xfce4-terminal xfce4-xkb-plugin  \
+	novnc websockify \
 	\
 	# fix "LC_ALL: cannot change locale (en_US.UTF-8)""
 	locales \
