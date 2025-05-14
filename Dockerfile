@@ -69,7 +69,7 @@ RUN cd /home/ubuntu \
 RUN chown -R ubuntu:ubuntu /home/ubuntu/.*
 
 # ports
-EXPOSE 22 5900
+EXPOSE 22 5900 6080
 
 # # default command
 CMD ["/usr/bin/supervisord","-c","/etc/supervisord.conf"]
