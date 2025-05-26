@@ -12,8 +12,10 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN <<EOF
 apt-get update && apt-get upgrade -y
 apt-get install -y --no-install-recommends apt-utils sudo supervisor vim \
-   openssh-server xserver-xorg xvfb x11vnc dbus-x11 xfce4 \
-   xfce4-terminal xfce4-xkb-plugin novnc websockify
+   openssh-server \
+   xserver-xorg xvfb x11vnc dbus-x11 xfce4 \
+   xfce4-terminal xfce4-xkb-plugin \
+   novnc websockify
 
 # fix "LC_ALL: cannot change locale (en_US.UTF-8)""
 apt-get install locales
@@ -71,15 +73,15 @@ ADD config/xfce4/xfconf/xfce-perchannel-xml/xsettings.xml /home/ubuntu/.config/x
 
 # TZ, aliases
 RUN cd /home/ubuntu \
-	&& echo 'export TZ=/usr/share/zoneinfo/$TZ' >> .bashrc \
-	&& sed -i 's/#alias/alias/' .bashrc  \
-	&& echo "alias lla='ls -al'" 		>> .bashrc \
-	&& echo "alias llt='ls -ltr'"  		>> .bashrc \
-	&& echo "alias llta='ls -altr'" 	>> .bashrc \
-	&& echo "alias llh='ls -lh'" 		>> .bashrc \
-	&& echo "alias lld='ls -l|grep ^d'" >> .bashrc \
-	&& echo "alias hh=history" 			>> .bashrc \
-	&& echo "alias hhg='history|grep -i" '"$@"' "'" >> .bashrc
+  && echo 'export TZ=/usr/share/zoneinfo/$TZ' >> .bashrc \
+  && sed -i 's/#alias/alias/' .bashrc  \
+  && echo "alias lla='ls -al'" 		>> .bashrc \
+  && echo "alias llt='ls -ltr'"  		>> .bashrc \
+  && echo "alias llta='ls -altr'" 	>> .bashrc \
+  && echo "alias llh='ls -lh'" 		>> .bashrc \
+  && echo "alias lld='ls -l|grep ^d'" >> .bashrc \
+  && echo "alias hh=history" 			>> .bashrc \
+  && echo "alias hhg='history|grep -i" '"$@"' "'" >> .bashrc
 
 # set owner
 RUN chown -R ubuntu:ubuntu /home/ubuntu/.*
