@@ -1,0 +1,39 @@
+services:
+  imx:
+    image: marekbykowski/ubuntu-vnc:22.04-imx-yocto-artifacts
+    ports:
+      - '7660:22'
+      - '7661:5900'
+      - '7662:6080'
+    hostname: imx
+    networks:
+      - network1
+    #stdin_open: true # docker run -i
+    #tty: true        # docker run -t
+  armds:
+    image: marekbykowski/ubuntu-vnc:22.04-armds
+    ports:
+      - '8660:22'
+      - '8661:5900'
+      - '8662:6080'
+    hostname: armds
+    networks:
+      - network1
+    #stdin_open: true # docker run -i
+    #tty: true        # docker run -t
+  a55:
+    image: marekbykowski/ubuntu-vnc:22.04-aem-a55
+    ports:
+      - '9660:22'
+      - '9661:5900'
+      - '9662:6080'
+      - '7101:7101'
+    hostname: a55
+    networks:
+      - network1
+    #stdin_open: true # docker run -i
+    #tty: true        # docker run -t
+
+networks:
+  network1:
+    driver: bridge
