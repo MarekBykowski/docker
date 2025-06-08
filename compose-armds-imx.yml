@@ -1,6 +1,6 @@
 services:
   imx:
-    image: marekbykowski/ubuntu-vnc:22.04-imx-yocto-artifacts
+    image: marekbykowski/ubuntu-vnc:22.04-imx
     ports:
       - '7660:22'
       - '7661:5900'
