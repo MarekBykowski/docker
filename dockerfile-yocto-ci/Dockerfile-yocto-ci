@@ -1,4 +1,9 @@
-FROM ubuntu:22.04
+FROM ubuntu:20.04
+
+ARG username
+ARG gid
+ARG uid
+ARG password
 
 # default screen size
 ENV XRES=1280x800x24
@@ -24,7 +29,6 @@ echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen
 echo "LANG=en_US.UTF-8" > /etc/locale.conf
 locale-gen en_US.UTF-8
 EOF
-
 
 # install Yocto at el.
 RUN <<EOF

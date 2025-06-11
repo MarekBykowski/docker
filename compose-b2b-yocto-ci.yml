@@ -1,0 +1,27 @@
+services:
+  b2b:
+    image: ${D_USER:?error}-ubuntu:20.04-rc0.0
+    build:
+      context: ./dockerfile-b2b/
+      dockerfile: Dockerfile-b2b
+      no_cache: true
+      args:
+        - username=${D_USER:?error}
+        - gid=${D_GID:?error}
+        - uid=${D_UID:?error}
+        - password=${D_PASSWORD:?error}
+        - HTTP_PROXY=${D_HTTP_PROXY:?error}
+        - HTTPS_PROXY=${D_HTTPS_PROXY:?error}
+    ports:
+      - '8660:22'
+      - '8661:5900'
+      - '8662:6080'
+    hostname: mbykowsx
+    networks:
+      - network-b2b-yocto-ci
+    #stdin_open: true # docker run -i
+    #tty: true        # docker run -t
+
+networks:
+  network-b2b-yocto-ci:
+    driver: bridge

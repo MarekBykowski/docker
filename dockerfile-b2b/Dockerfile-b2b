@@ -28,8 +28,7 @@ EOF
 COPY apt.conf /etc/apt/
 
 RUN <<EOF
-apt-get -y update
-apt-get -y install build-essential chrpath cpio debianutils diffstat file gawk \
+apt-get -y update && apt-get -y install build-essential chrpath cpio debianutils diffstat file gawk \
   gcc iputils-ping libacl1 liblz4-tool python3 python3-git locales \
   python3-jinja2 python3-pexpect python3-pip python3-subunit socat texinfo unzip \
   wget xz-utils zstd
@@ -47,7 +46,7 @@ EOF
 
 # in .bash_aliases I put MOTD and the other is a sample qcow
 COPY .bash_aliases /home/${username}
-COPY core-image-cxl-sdk-cxlx86-64.rootfs.wic.qcow2 /home/${username}
+#COPY core-image-cxl-sdk-cxlx86-64.rootfs.wic.qcow2 /home/${username}
 # install gh
 COPY gh_2.69.0_linux_amd64.deb /home/${username}
 RUN dpkg -i /home/${username}/gh_2.69.0_linux_amd64.deb
@@ -56,27 +55,19 @@ RUN dpkg -i /home/${username}/gh_2.69.0_linux_amd64.deb
 RUN echo "dash dash/sh boolean false" | debconf-set-selections
 RUN DEBIAN_FRONTEND=noninteractive dpkg-reconfigure dash
 
-# Install firefox outside of snap
-RUN install -d -m 0755 /etc/apt/keyrings
-RUN wget -q https://packages.mozilla.org/apt/repo-signing-key.gpg -O- | sudo tee /etc/apt/keyrings/packages.mozilla.org.asc > /dev/null
-RUN gpg -n -q --import --import-options import-show /etc/apt/keyrings/packages.mozilla.org.asc | awk '/pub/{getline; gsub(/^ +| +$/,""); if($0 == "35BAA0B33E9EB396F59CA838C0BA5CE6DC6315A3") print "\nThe key fingerprint matches ("$0").\n"; else print "\nVerification failed: the fingerprint ("$0") does not match the expected one.\n"}'
-RUN echo "deb [signed-by=/etc/apt/keyrings/packages.mozilla.org.asc] https://packages.mozilla.org/apt mozilla main" | sudo tee -a /etc/apt/sources.list.d/mozilla.list > /dev/null
-RUN echo '\n\
-Package: * \n\
-Pin: origin packages.mozilla.org \n\
-Pin-Priority: 1000' | tee /etc/apt/preferences.d/mozilla
-RUN apt-get update && apt-get -y install firefox
-
 # Install b2b tools
-RUN mkdir -p /home/${username}/avery/2023_1215
-COPY apciexactor-2.5c.cxl.tar.gz aqcxl_sim-2023_1215.tar.gz \
-  avery_pli-2023_1128.tar.gz avery_qemu-docker.zip \
-  verdi.tar.gz vcsmx.tar.gz /tmp
-RUN for f in /tmp/*tar.gz; do tar -xzf $f -C /home/${username}/avery/2023_1215 && rm $f; done
-RUN unzip /tmp/avery_qemu-docker.zip -d /home/${username}/avery/2023_1215
+#RUN mkdir -p /home/${username}/avery/2023_1215
+#COPY apciexactor-2.5c.cxl.tar.gz aqcxl_sim-2023_1215.tar.gz \
+#  avery_pli-2023_1128.tar.gz avery_qemu-docker.zip \
+#  verdi.tar.gz vcsmx.tar.gz /tmp
+#RUN for f in /tmp/*tar.gz; do tar -xzf $f -C /home/${username}/avery/2023_1215 && rm $f; done
+#RUN unzip /tmp/avery_qemu-docker.zip -d /home/${username}/avery/2023_1215
 
 # add my sys config files
 ADD etc /etc
+
+# Install firefox
+RUN apt-get -y update && apt-get -y install firefox
 
 # user config files
 # terminal
@@ -85,8 +76,11 @@ ADD config/xfce4/terminal/terminalrc /home/ubuntu/.config/xfce4/terminal/termina
 ADD config/xfce4/xfconf/xfce-perchannel-xml/xfce4-desktop.xml /home/ubuntu/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-desktop.xml
 # icon theme
 ADD config/xfce4/xfconf/xfce-perchannel-xml/xsettings.xml /home/ubuntu/.config/xfce4/xfconf/xfce-perchannel-xml/xsettings.xml
+
 RUN chown -v -R ${username}:${username} /home/${username}
 
-WORKDIR /home/${username}
+# ports
+EXPOSE 22 5900 6080
 
-USER ${username}
+# # default command
+CMD ["/usr/bin/supervisord","-c","/etc/supervisord.conf"]
