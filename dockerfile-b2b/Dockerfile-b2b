@@ -5,6 +5,9 @@ ARG gid
 ARG uid
 ARG password
 
+# default screen size
+ENV XRES=1280x800x24
+
 # Ubuntu doesn't set this var and without it avery qemu fails
 ENV USER=${username}
 
@@ -30,14 +33,16 @@ apt-get -y install build-essential chrpath cpio debianutils diffstat file gawk \
   gcc iputils-ping libacl1 liblz4-tool python3 python3-git locales \
   python3-jinja2 python3-pexpect python3-pip python3-subunit socat texinfo unzip \
   wget xz-utils zstd
-apt-get -y install sudo vim tmux gzip unzip git
-apt-get -y install git
-apt-get -y install cpu-checker
-apt-get -y install perl libterm-readkey-perl
-apt-get -y install libpixman-1-0 libpixman-1-dev
-apt-get -y install libglib2.0-0
-#required from sv
-apt-get -y install dc time libelf1
+apt-get -y install sudo vim tmux gzip unzip git cpu-checker  perl libterm-readkey-perl \
+ libpixman-1-0 libpixman-1-dev  libglib2.0-0 \
+# required from sv
+ dc time libelf1
+# install GUI, vnc, novnc
+apt-get install -y --no-install-recommends apt-utils sudo supervisor vim \
+   openssh-server \
+   xserver-xorg xvfb x11vnc dbus-x11 xfce4 \
+   xfce4-terminal xfce4-xkb-plugin \
+   novnc websockify
 EOF
 
 # in .bash_aliases I put MOTD and the other is a sample qcow
@@ -51,6 +56,18 @@ RUN dpkg -i /home/${username}/gh_2.69.0_linux_amd64.deb
 RUN echo "dash dash/sh boolean false" | debconf-set-selections
 RUN DEBIAN_FRONTEND=noninteractive dpkg-reconfigure dash
 
+# Install firefox outside of snap
+RUN install -d -m 0755 /etc/apt/keyrings
+RUN wget -q https://packages.mozilla.org/apt/repo-signing-key.gpg -O- | sudo tee /etc/apt/keyrings/packages.mozilla.org.asc > /dev/null
+RUN gpg -n -q --import --import-options import-show /etc/apt/keyrings/packages.mozilla.org.asc | awk '/pub/{getline; gsub(/^ +| +$/,""); if($0 == "35BAA0B33E9EB396F59CA838C0BA5CE6DC6315A3") print "\nThe key fingerprint matches ("$0").\n"; else print "\nVerification failed: the fingerprint ("$0") does not match the expected one.\n"}'
+RUN echo "deb [signed-by=/etc/apt/keyrings/packages.mozilla.org.asc] https://packages.mozilla.org/apt mozilla main" | sudo tee -a /etc/apt/sources.list.d/mozilla.list > /dev/null
+RUN echo '\n\
+Package: * \n\
+Pin: origin packages.mozilla.org \n\
+Pin-Priority: 1000' | tee /etc/apt/preferences.d/mozilla
+RUN apt-get update && apt-get -y install firefox
+
+# Install b2b tools
 RUN mkdir -p /home/${username}/avery/2023_1215
 COPY apciexactor-2.5c.cxl.tar.gz aqcxl_sim-2023_1215.tar.gz \
   avery_pli-2023_1128.tar.gz avery_qemu-docker.zip \
@@ -58,6 +75,16 @@ COPY apciexactor-2.5c.cxl.tar.gz aqcxl_sim-2023_1215.tar.gz \
 RUN for f in /tmp/*tar.gz; do tar -xzf $f -C /home/${username}/avery/2023_1215 && rm $f; done
 RUN unzip /tmp/avery_qemu-docker.zip -d /home/${username}/avery/2023_1215
 
+# add my sys config files
+ADD etc /etc
+
+# user config files
+# terminal
+ADD config/xfce4/terminal/terminalrc /home/ubuntu/.config/xfce4/terminal/terminalrc
+# wallpaper
+ADD config/xfce4/xfconf/xfce-perchannel-xml/xfce4-desktop.xml /home/ubuntu/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-desktop.xml
+# icon theme
+ADD config/xfce4/xfconf/xfce-perchannel-xml/xsettings.xml /home/ubuntu/.config/xfce4/xfconf/xfce-perchannel-xml/xsettings.xml
 RUN chown -v -R ${username}:${username} /home/${username}
 
 WORKDIR /home/${username}
