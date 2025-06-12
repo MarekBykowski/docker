@@ -17,7 +17,7 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 #ENV DEBIAN_FRONTEND=noninteractive
 
 RUN <<EOF
-# docker build --build-arg username=mbykowsx
+# To pass ${username} to Dockerfile go 'docker build --build-arg username=mbykowsx'
 groupadd --gid ${gid} ${username}
 useradd --uid ${uid} --gid ${gid} --shell /bin/bash --create-home ${username}
 usermod -a -G sudo ${username}
@@ -25,9 +25,14 @@ usermod -a -G kvm ${username}
 echo "${username}:${password}" | chpasswd
 EOF
 
+# This apt-conf includes the http proxy used in Intel. Run it only for Intel.
 COPY apt.conf /etc/apt/
 
+# sshd requires a log dir and when misses it fails. Add it in.
+RUN mkdir -p /var/run/sshd && chmod 755 /var/run/sshd
+
 RUN <<EOF
+# esentially Yocto tools
 apt-get -y update && apt-get -y install build-essential chrpath cpio debianutils diffstat file gawk \
   gcc iputils-ping libacl1 liblz4-tool python3 python3-git locales \
   python3-jinja2 python3-pexpect python3-pip python3-subunit socat texinfo unzip \
@@ -44,14 +49,17 @@ apt-get install -y --no-install-recommends apt-utils sudo supervisor vim \
    novnc websockify
 EOF
 
-# in .bash_aliases I put MOTD and the other is a sample qcow
+# Put MOTD in .bash_aliases
 COPY .bash_aliases /home/${username}
+
+# Copy sample qcow to have what to get started with
 #COPY core-image-cxl-sdk-cxlx86-64.rootfs.wic.qcow2 /home/${username}
-# install gh
+
+# install gh. in Ubuntu 20.04 it is not in apt
 COPY gh_2.69.0_linux_amd64.deb /home/${username}
 RUN dpkg -i /home/${username}/gh_2.69.0_linux_amd64.deb
 
-# make /bin/sh symlink to bash instead of dash:
+# make /bin/sh symlink to bash instead of running dash:
 RUN echo "dash dash/sh boolean false" | debconf-set-selections
 RUN DEBIAN_FRONTEND=noninteractive dpkg-reconfigure dash
 
@@ -64,18 +72,18 @@ RUN DEBIAN_FRONTEND=noninteractive dpkg-reconfigure dash
 #RUN unzip /tmp/avery_qemu-docker.zip -d /home/${username}/avery/2023_1215
 
 # add my sys config files
-ADD etc /etc
+COPY etc /etc
 
 # Install firefox
 RUN apt-get -y update && apt-get -y install firefox
 
 # user config files
 # terminal
-ADD config/xfce4/terminal/terminalrc /home/ubuntu/.config/xfce4/terminal/terminalrc
+COPY config/xfce4/terminal/terminalrc /home/${username}/.config/xfce4/terminal/terminalrc
 # wallpaper
-ADD config/xfce4/xfconf/xfce-perchannel-xml/xfce4-desktop.xml /home/ubuntu/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-desktop.xml
+COPY config/xfce4/xfconf/xfce-perchannel-xml/xfce4-desktop.xml /home/${username}/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-desktop.xml
 # icon theme
-ADD config/xfce4/xfconf/xfce-perchannel-xml/xsettings.xml /home/ubuntu/.config/xfce4/xfconf/xfce-perchannel-xml/xsettings.xml
+COPY config/xfce4/xfconf/xfce-perchannel-xml/xsettings.xml /home/${username}/.config/xfce4/xfconf/xfce-perchannel-xml/xsettings.xml
 
 RUN chown -v -R ${username}:${username} /home/${username}
 

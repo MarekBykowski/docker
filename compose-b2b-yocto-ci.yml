@@ -12,6 +12,8 @@ services:
         - password=${D_PASSWORD:?error}
         - HTTP_PROXY=${D_HTTP_PROXY:?error}
         - HTTPS_PROXY=${D_HTTPS_PROXY:?error}
+    volumes:
+        - ${D_HOME:?error}:${D_HOME:?error}/host
     ports:
       - '8660:22'
       - '8661:5900'
