@@ -209,7 +209,8 @@ Once VNC is tunneled through SSH, you can connect your VNC viewer to you specifi
 
 ### File contents:    
 
-	[supervisord]
+```
+[supervisord]
 nodaemon = true
 user = root
 # loglevel = debug
@@ -234,3 +235,4 @@ autorestart = true
 directory = /home/ubuntu
 user = ubuntu
 priority = 300
+```
