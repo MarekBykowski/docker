@@ -8,101 +8,85 @@ ARG password
 # default screen size
 ENV XRES=1280x800x24
 
-# default tzdata
-ENV TZ=Etc/UTC
+# Ubuntu doesn't set this var and without it avery qemu fails
+ENV USER=${username}
 
-ENV DEBIAN_FRONTEND=noninteractive
+# supress dialogue when installing tzdata
+ENV TZ=Europe/Warsaw
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+#ENV DEBIAN_FRONTEND=noninteractive
 
-# install ubuntu filares (xfce, vnc, novnc, etc.)
 RUN <<EOF
-apt-get update && apt-get upgrade -y
+# To pass ${username} to Dockerfile go 'docker build --build-arg username=mbykowsx'
+groupadd --gid ${gid} ${username}
+useradd --uid ${uid} --gid ${gid} --shell /bin/bash --create-home ${username}
+usermod -a -G sudo ${username}
+usermod -a -G kvm ${username}
+echo "${username}:${password}" | chpasswd
+EOF
+
+# This apt-conf includes the http proxy used in Intel. Run it only for Intel.
+COPY apt.conf /etc/apt/
+
+# Happen
+RUN mkdir -p /var/run/sshd && chmod 755 /var/run/sshd
+
+RUN <<EOF
+# esentially Yocto tools
+apt-get -y update && apt-get -y install build-essential chrpath cpio debianutils diffstat file gawk \
+  gcc iputils-ping libacl1 liblz4-tool python3 python3-git locales \
+  python3-jinja2 python3-pexpect python3-pip python3-subunit socat texinfo unzip \
+  wget xz-utils zstd iproute2
+apt-get -y install sudo vim tmux gzip unzip git cpu-checker  perl libterm-readkey-perl \
+ libpixman-1-0 libpixman-1-dev  libglib2.0-0 \
+# required from sv
+ dc time libelf1
+# install GUI, vnc, novnc
 apt-get install -y --no-install-recommends apt-utils sudo supervisor vim \
    openssh-server \
    xserver-xorg xvfb x11vnc dbus-x11 xfce4 \
    xfce4-terminal xfce4-xkb-plugin \
    novnc websockify
-
-# fix "LC_ALL: cannot change locale (en_US.UTF-8)""
-apt-get install locales
-echo "LC_ALL=en_US.UTF-8" >> /etc/environment
-echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen
-echo "LANG=en_US.UTF-8" > /etc/locale.conf
-locale-gen en_US.UTF-8
 EOF
 
-# install Yocto at el.
-RUN <<EOF
-apt-get -y update
-apt-get -y install build-essential chrpath cpio debianutils diffstat file gawk \
-  gcc iputils-ping libacl1 liblz4-tool python3 python3-git locales \
-  python3-jinja2 python3-pexpect python3-pip python3-subunit socat texinfo unzip \
-  wget xz-utils zstd
-apt-get -y install tmux gzip unzip git
-apt-get -y install cpu-checker
-apt-get -y install perl libterm-readkey-perl
-apt-get -y install libpixman-1-0 libpixman-1-dev
-apt-get -y install libglib2.0-0
-#required from sv
-apt-get -y install dc time
-EOF
+# Yocto needs 'en_US.UTF-8' locale genearted.
+RUN sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && locale-gen
 
+# Put MOTD in .bash_aliases
+COPY .bash_aliases /home/${username}
 
-# Install firefox outside of snap
-RUN install -d -m 0755 /etc/apt/keyrings
-RUN wget -q https://packages.mozilla.org/apt/repo-signing-key.gpg -O- | sudo tee /etc/apt/keyrings/packages.mozilla.org.asc > /dev/null
-RUN gpg -n -q --import --import-options import-show /etc/apt/keyrings/packages.mozilla.org.asc | awk '/pub/{getline; gsub(/^ +| +$/,""); if($0 == "35BAA0B33E9EB396F59CA838C0BA5CE6DC6315A3") print "\nThe key fingerprint matches ("$0").\n"; else print "\nVerification failed: the fingerprint ("$0") does not match the expected one.\n"}'
-RUN echo "deb [signed-by=/etc/apt/keyrings/packages.mozilla.org.asc] https://packages.mozilla.org/apt mozilla main" | sudo tee -a /etc/apt/sources.list.d/mozilla.list > /dev/null
-RUN echo '\n\
-Package: * \n\
-Pin: origin packages.mozilla.org \n\
-Pin-Priority: 1000' | tee /etc/apt/preferences.d/mozilla
-RUN apt-get update && apt-get -y install firefox
+# install gh. in Ubuntu 20.04 it is not in apt
+COPY gh_2.69.0_linux_amd64.deb /home/${username}
+RUN dpkg -i /home/${username}/gh_2.69.0_linux_amd64.deb
 
-# cleanup and fix
-RUN <<EOF
-apt-get autoremove -y
-apt-get --fix-broken install
-apt-get clean
-rm -rf /var/lib/apt/lists/*
-EOF
-
-# required preexisting dirs
-RUN mkdir /run/sshd
-
-# users and groups
-RUN echo "root:ubuntu" | /usr/sbin/chpasswd \
-    && useradd -m ubuntu -s /bin/bash \
-    && echo "ubuntu:ubuntu" | /usr/sbin/chpasswd \
-    && echo "ubuntu    ALL=(ALL) ALL" >> /etc/sudoers
+# make /bin/sh symlink to bash instead of running dash:
+RUN echo "dash dash/sh boolean false" | debconf-set-selections
+RUN DEBIAN_FRONTEND=noninteractive dpkg-reconfigure dash
 
 # add my sys config files
-ADD etc /etc
+COPY etc /etc
+
+# Install firefox
+RUN apt-get -y update && apt-get -y install firefox
 
 # user config files
 # terminal
-ADD config/xfce4/terminal/terminalrc /home/ubuntu/.config/xfce4/terminal/terminalrc
+COPY config/xfce4/terminal/terminalrc /home/${username}/.config/xfce4/terminal/terminalrc
 # wallpaper
-ADD config/xfce4/xfconf/xfce-perchannel-xml/xfce4-desktop.xml /home/ubuntu/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-desktop.xml
+COPY config/xfce4/xfconf/xfce-perchannel-xml/xfce4-desktop.xml /home/${username}/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-desktop.xml
 # icon theme
-ADD config/xfce4/xfconf/xfce-perchannel-xml/xsettings.xml /home/ubuntu/.config/xfce4/xfconf/xfce-perchannel-xml/xsettings.xml
+COPY config/xfce4/xfconf/xfce-perchannel-xml/xsettings.xml /home/${username}/.config/xfce4/xfconf/xfce-perchannel-xml/xsettings.xml
 
-# TZ, aliases
-RUN cd /home/ubuntu \
-  && echo 'export TZ=/usr/share/zoneinfo/$TZ' >> .bashrc \
-  && sed -i 's/#alias/alias/' .bashrc  \
-  && echo "alias lla='ls -al'" 		>> .bashrc \
-  && echo "alias llt='ls -ltr'"  		>> .bashrc \
-  && echo "alias llta='ls -altr'" 	>> .bashrc \
-  && echo "alias llh='ls -lh'" 		>> .bashrc \
-  && echo "alias lld='ls -l|grep ^d'" >> .bashrc \
-  && echo "alias hh=history" 			>> .bashrc \
-  && echo "alias hhg='history|grep -i" '"$@"' "'" >> .bashrc
+# Clone meta-cxl and poky
+RUN mkdir -p /home/${username}/yocto/
+ADD https://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@github.com/MarekBykowski/poky.git#nanbield /home/${username}/yocto/poky
+ADD https://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@github.com/MarekBykowski/meta-cxl.git#nanbield /home/${username}/yocto/meta-cxl
+ADD https://git.openembedded.org/meta-openembedded.git#nanbield /home/${username}/yocto/meta-openembedded
 
-# set owner
-RUN chown -R ubuntu:ubuntu /home/ubuntu/.*
+RUN chown -v -R ${username}:${username} /home/${username}
 
 # ports
 EXPOSE 22 5900 6080
 
-# # default command
+# default command
 CMD ["/usr/bin/supervisord","-c","/etc/supervisord.conf"]
