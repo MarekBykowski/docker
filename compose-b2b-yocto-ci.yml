@@ -37,6 +37,7 @@ services:
         - password=${D_PASSWORD:?error}
         - HTTP_PROXY=${D_HTTP_PROXY:?error}
         - HTTPS_PROXY=${D_HTTPS_PROXY:?error}
+        - GT=${GIT_AUTH_TOKEN:?error}
     volumes:
         - ${D_HOME:?error}:${D_HOME:?error}/host
     ports:

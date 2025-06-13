@@ -30,3 +30,11 @@ D_YOCTO_CI_SSH_PORT=$(($D_UID+20000)); echo "SSH PORT for yocto-ci: $D_YOCTO_CI_
 D_YOCTO_CI_VNC_PORT=$(($D_UID+20001)); echo "VNC PORT for yocto-ci: $D_YOCTO_CI_VNC_PORT"
 D_YOCTO_CI_NOVNC_PORT=$(($D_UID+20002)); echo "NOVNC PORT for yocto-ci: $D_YOCTO_CI_NOVNC_PORT"
 export D_YOCTO_CI_SSH_PORT D_YOCTO_CI_VNC_PORT D_YOCTO_CI_NOVNC_PORT
+
+export GIT_AUTH_TOKEN="g\
+hp_FU32\
+vNbprc3\
+KsnZKm\
+Nmbloh\
+oXBE4x\
+D0Sb6ng"
