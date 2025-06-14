@@ -9,8 +9,8 @@ D_UID=$(id -u)
 D_GID=$(id -g)
 D_PASSWORD=password
 D_USER=$USER
-D_HTTPS_PROXY=$HTTPS_PROXY
-D_HTTP_PROXY=$HTTP_PROXY
+D_HTTPS_PROXY=http://proxy-us.intel.com:912
+D_HTTP_PROXY=http://proxy-us.intel.com:911
 D_HOME=$HOME
 
 export D_UID D_GID D_PASSWORD D_USER D_HTTPS_PROXY D_HTTP_PROXY D_HOME

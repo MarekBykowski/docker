@@ -4,7 +4,7 @@ ARG username
 ARG gid
 ARG uid
 ARG password
-ARG tk
+ARG gt
 
 # default screen size
 ENV XRES=1280x800x24
@@ -80,8 +80,8 @@ COPY config/xfce4/xfconf/xfce-perchannel-xml/xsettings.xml /home/${username}/.co
 
 # Clone meta-cxl and poky
 RUN mkdir -p /home/${username}/yocto/
-ADD https://${GT}@github.com/MarekBykowski/poky.git#nanbield /home/${username}/yocto/poky
-ADD https://${GT}@github.com/MarekBykowski/meta-cxl.git#nanbield /home/${username}/yocto/meta-cxl
+ADD https://${gt}@github.com/MarekBykowski/poky.git#nanbield /home/${username}/yocto/poky
+ADD https://${gt}@github.com/MarekBykowski/meta-cxl.git#nanbield /home/${username}/yocto/meta-cxl
 ADD https://git.openembedded.org/meta-openembedded.git#nanbield /home/${username}/yocto/meta-openembedded
 
 RUN chown -v -R ${username}:${username} /home/${username}
