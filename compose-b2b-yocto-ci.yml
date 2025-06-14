@@ -12,8 +12,8 @@ services:
         - gid=${D_GID:?error}
         - uid=${D_UID:?error}
         - password=${D_PASSWORD:?error}
-        - HTTP_PROXY=${D_HTTP_PROXY:?error}
-        - HTTPS_PROXY=${D_HTTPS_PROXY:?error}
+          #- HTTP_PROXY=${D_HTTP_PROXY:?error}
+          #- HTTPS_PROXY=${D_HTTPS_PROXY:?error}
     volumes:
         - ${D_HOME:?error}:${D_HOME:?error}/host
     ports:
@@ -41,8 +41,8 @@ services:
         - uid=${D_UID:?error}
         - password=${D_PASSWORD:?error}
         - gt=${GIT_AUTH_TOKEN:?error}
-        - HTTP_PROXY=${D_HTTP_PROXY:?error}
-        - HTTPS_PROXY=${D_HTTPS_PROXY:?error}
+          #- HTTP_PROXY=${D_HTTP_PROXY:?error}
+          #- HTTPS_PROXY=${D_HTTPS_PROXY:?error}
     volumes:
         - ${D_HOME:?error}:${D_HOME:?error}/host
     ports:
@@ -50,13 +50,12 @@ services:
       - '${D_YOCTO_CI_VNC_PORT:?error}:5900'
       - '${D_YOCTO_CI_NOVNC_PORT:?error}:6080'
     privileged: true
+      #environment:
+      #- HTTP_PROXY=${D_HTTP_PROXY:?error}
+      #- HTTPS_PROXY=${D_HTTPS_PROXY:?error}
     hostname: yocto-ci
     networks:
       - network-b2b-yocto-ci
-    environment:
-      - HTTP_PROXY=${D_HTTP_PROXY:?error}
-      - HTTPS_PROXY=${D_HTTPS_PROXY:?error}
-
     #stdin_open: true # docker run -i
     #tty: true        # docker run -t
 
