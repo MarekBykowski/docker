@@ -4,6 +4,20 @@
 # As the values are exported to the system and available for all the processes
 # I use prefix D_ for indicating this is for Docker containers.
 
+# We run containers with 'privileged'. Default builder (BuildKit daemon)
+# named 'default' doesn't allow such an entitlement.
+#
+#	$ docker buildx ls
+#	NAME/NODE     DRIVER/ENDPOINT   STATUS    BUILDKIT   PLATFORMS
+#	default*      docker
+#	 \_ default    \_ default       running   v0.21.0    linux/amd64 (+4), linux/386
+#
+# We need to create a separate builder and configure it with 'security.insecure' allowing
+# creation of the containers with 'privileged`. Additionally need to explicitly
+# grant the required entitlements using the --allow flag.
+#export BUILDX_BUILDER=secure-builder; echo "Using BuildKit daemon: $BUILDX_BUILDER"
+
+
 # Common values shared by two containers
 D_UID=$(id -u)
 D_GID=$(id -g)
