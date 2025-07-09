@@ -26,8 +26,9 @@ D_USER=$USER
 D_HTTPS_PROXY=http://proxy-us.intel.com:912
 D_HTTP_PROXY=http://proxy-us.intel.com:911
 D_HOME=$HOME
+COMPOSE_PROJECT_NAME="${D_USER}-docker-eco-system"; echo "Your Docker eco-system is named: $COMPOSE_PROJECT_NAME"
 
-export D_UID D_GID D_PASSWORD D_USER D_HTTPS_PROXY D_HTTP_PROXY D_HOME
+export D_UID D_GID D_PASSWORD D_USER D_HTTPS_PROXY D_HTTP_PROXY D_HOME COMPOSE_PROJECT_NAME
 
 # And some of the values must be unique per user and per container
 # Ports are defined from 'user id' + number which is system wise unique
