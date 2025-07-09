@@ -19,7 +19,7 @@ elif [[ $1 == commit ]]; then
 	for t in `docker compose -f compose-b2b-yocto-ci.yml ps --services`; do
 		service+=($t)
 	done
-	for ((t=0;t<3;t++)); do 
+	for ((t=0;t<2;t++)); do 
 		echo "docker compose -f compose-b2b-yocto-ci.yml commit ${service[$t]} ${i[$t]}"
 		#echo "docker commit ${c[$t]} ${i[$t]}"
 	done
