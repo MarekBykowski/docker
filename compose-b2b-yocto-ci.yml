@@ -1,6 +1,7 @@
 services:
   b2b:
     image: ${D_USER:?error}-b2b:ubuntu
+    container_name: ${D_USER:?error}-b2b
     build:
       context: ./dockerfile-b2b
       dockerfile: Dockerfile-b2b
@@ -29,6 +30,7 @@ services:
 
   yocto-ci:
     image: ${D_USER:?error}-yocto-ci:ubuntu
+    container_name: ${D_USER:?error}-yocto-ci
     build:
       context: ./dockerfile-yocto-ci
       dockerfile: Dockerfile-yocto-ci
@@ -45,6 +47,7 @@ services:
           #- HTTPS_PROXY=${D_HTTPS_PROXY:?error}
     volumes:
         - ${D_HOME:?error}:${D_HOME:?error}/host
+          #- shared-volume:/home/${D_USER:?error}
     ports:
       - '${D_YOCTO_CI_SSH_PORT:?error}:22'
       - '${D_YOCTO_CI_VNC_PORT:?error}:5900'
@@ -58,6 +61,9 @@ services:
       - network-b2b-yocto-ci
     #stdin_open: true # docker run -i
     #tty: true        # docker run -t
+
+#volumes:
+#    shared-volume:
 
 networks:
   network-b2b-yocto-ci:

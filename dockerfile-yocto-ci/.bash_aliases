@@ -1,7 +1,7 @@
 cat << 'EOF'
-Welcome to the Docker yocto-ci continaer!
+Welcome to the Docker yocto-ci container!
 
-This container run yocto-ci (auto-tests) from QEMU against either SV or COSIM.
+This container runs yocto-ci (auto-tests) from QEMU against either SV or COSIM.
 EOF
 
 if [[ : ]]; then

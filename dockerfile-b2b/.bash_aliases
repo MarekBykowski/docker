@@ -1,7 +1,9 @@
 cat << 'EOF'
-Welcome to the Docker yocto-ci continaer!
+Welcome to the Docker b2b container!
 
-This container run yocto-ci (auto-tests) from QEMU against either SV or COSIM.
+Within this container you can run `Avery B2B` on the same machine.
+Source `enviroment_setup.sh` and folow the howto.
+`source ~/avery/2023_1215/avery_qemu-docker/enviroment_setup.sh`
 EOF
 
 if [[ : ]]; then
