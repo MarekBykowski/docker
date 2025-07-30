@@ -26,7 +26,7 @@ D_USER=$USER
 D_HTTPS_PROXY=http://proxy-us.intel.com:912
 D_HTTP_PROXY=http://proxy-us.intel.com:911
 D_HOME=$HOME
-COMPOSE_PROJECT_NAME="${D_USER}-docker-eco-system"; echo "Your Docker eco-system is named: $COMPOSE_PROJECT_NAME"
+COMPOSE_PROJECT_NAME="${D_USER}"; echo "Your Docker eco-system is named: $COMPOSE_PROJECT_NAME"
 
 export D_UID D_GID D_PASSWORD D_USER D_HTTPS_PROXY D_HTTP_PROXY D_HOME COMPOSE_PROJECT_NAME
 
@@ -34,13 +34,13 @@ export D_UID D_GID D_PASSWORD D_USER D_HTTPS_PROXY D_HTTP_PROXY D_HOME COMPOSE_P
 # Ports are defined from 'user id' + number which is system wise unique
 # and remains the same across logins.
 
-# Ports of container b2b
+# Ports for container b2b
 D_B2B_SSH_PORT=$(($D_UID+10000)); echo "SSH PORT for b2b: $D_B2B_SSH_PORT"
 D_B2B_VNC_PORT=$(($D_UID+10001)); echo "VNC PORT for b2b: $D_B2B_VNC_PORT"
 D_B2B_NOVNC_PORT=$(($D_UID+10002)); echo "NOVNC PORT for b2b: $D_B2B_NOVNC_PORT"
 export D_B2B_SSH_PORT D_B2B_VNC_PORT D_B2B_NOVNC_PORT
 
-# Ports of container yocto-ci
+# Ports for container yocto-ci
 D_YOCTO_CI_SSH_PORT=$(($D_UID+20000)); echo "SSH PORT for yocto-ci: $D_YOCTO_CI_SSH_PORT"
 D_YOCTO_CI_VNC_PORT=$(($D_UID+20001)); echo "VNC PORT for yocto-ci: $D_YOCTO_CI_VNC_PORT"
 D_YOCTO_CI_NOVNC_PORT=$(($D_UID+20002)); echo "NOVNC PORT for yocto-ci: $D_YOCTO_CI_NOVNC_PORT"
