@@ -64,12 +64,12 @@ RUN echo "dash dash/sh boolean false" | debconf-set-selections
 RUN DEBIAN_FRONTEND=noninteractive dpkg-reconfigure dash
 
 # Install b2b tools
-#RUN mkdir -p /home/${username}/avery/2023_1215
-#COPY apciexactor-2.5c.cxl.tar.gz aqcxl_sim-2023_1215.tar.gz \
-#  avery_pli-2023_1128.tar.gz avery_qemu-docker.zip \
-#  verdi.tar.gz vcsmx.tar.gz /tmp
-#RUN for f in /tmp/*tar.gz; do tar -xzf $f -C /home/${username}/avery/2023_1215 && rm $f; done
-#RUN unzip /tmp/avery_qemu-docker.zip -d /home/${username}/avery/2023_1215
+RUN mkdir -p /home/${username}/avery/2023_1215
+COPY apciexactor-2.5c.cxl.tar.gz aqcxl_sim-2023_1215.tar.gz \
+  avery_pli-2023_1128.tar.gz avery_qemu-docker.zip \
+  verdi.tar.gz vcsmx.tar.gz /tmp
+RUN for f in /tmp/*tar.gz; do tar -xzf $f -C /home/${username}/avery/2023_1215 && rm $f; done
+RUN unzip /tmp/avery_qemu-docker.zip -d /home/${username}/avery/2023_1215
 
 # add my sys config files
 COPY etc /etc
