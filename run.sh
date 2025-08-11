@@ -1,7 +1,7 @@
 #!/bin/bash
 
 file=compose-armds-a55-a55arm32.yml
-echo -e "Running Docker compose ${file}\n"
+echo -e "Running Docker compose file: ${file}\n"
 
 if [[ $1 == up ]]; then
 	docker compose -f ${file} up -d
