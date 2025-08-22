@@ -1,18 +1,25 @@
 #!/bin/bash
 
-: << 'EOF'
 # Check if the script is being sourced
 (return 0 2>/dev/null)
 if [ $? -eq 0 ]; then
-echo "Script is being sourced"
+#echo "Script is being sourced"
+:
 else
 echo "Script is being executed"
 fi
-EOF
+
+keys=("rvranax" "csmx" "svellipx" "tziyangx" "tonyhunx" "markhox" "test1" "mbykowsx")
+vals=(11100 11200 11300 11400 11500 11600 11700 11800)
+
+declare -A START_PORT_PER_USER
+for i in "${!keys[@]}"; do
+	START_PORT_PER_USER[${keys[$i]}]=${vals[$i]}
+done
 
 # Range of ports to check
-START_PORT=1024
-END_PORT=65535
+START_PORT=${START_PORT_PER_USER[$USER]}
+END_PORT=$((START_PORT+9))
 
 # Function to check if a port is in use
 is_port_in_use() {
@@ -33,14 +40,3 @@ echo_free_port() {
 		fi
 	done
 }
-
-ports=()
-while [ "${#ports[@]}" -lt 3 ]; do
-	port=$(echo_free_port $START_PORT)
-	if [[ ! " ${ports[*]} " =~ " $port " ]]; then
-		ports+=($port)
-		((START_PORT+=1))
-	fi
-done
-
-echo "The 3x ports found unused: ${ports[@]}"

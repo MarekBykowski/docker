@@ -1,7 +1,8 @@
 #!/bin/bash
 
 if [[ $1 == up ]]; then
-	docker compose -f compose-b2b-yocto-ci.yml up
+	test -f docker-compose.log && rm -f docker-compose.log
+	docker compose --progress=plain -f compose-b2b-yocto-ci.yml up | tee -a docker-compose.log
 	#docker compose -f compose-b2b-yocto-ci.yml up -d
 elif [[ $1 == down ]]; then
 	docker compose -f compose-b2b-yocto-ci.yml down --volumes
