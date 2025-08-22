@@ -5,9 +5,9 @@ services:
     build:
       context: ./dockerfile-b2b
       dockerfile: Dockerfile-b2b
-        #entitlements:
-        #- security.insecure
-        #no_cache: true
+      #entitlements:
+      #- security.insecure
+      #no_cache: true
       args:
         - username=${D_USER:?error}
         - gid=${D_GID:?error}
