@@ -30,8 +30,8 @@ env_config_name=environment-config
 env_config_path=$env_dir/$env_config_name
 
 test -f $env_config_path && {
-	echo "\"$env_config_path\" file has been created already and will be used for the docker eco-system."
-	echo "Each time you wish to use this configuration run:"
+	echo "You have already created a config file \"$env_config_path\" for the docker eco-system."
+	echo "Each time you wish to use it run:"
 	echo -e "\t'source $env_config_path'"
 	echo "If you want to create an updated config file remove this one and re-resource the script, eg."
 	echo -e "\t'rm -f $env_config_path && source $env_setup_path'"
