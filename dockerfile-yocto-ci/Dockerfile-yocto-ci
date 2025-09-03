@@ -18,7 +18,7 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN <<EOF
-# To pass ${username} to Dockerfile go 'docker build --build-arg username=mbykowsx'
+# To pass ${username} to Dockerfile go 'docker build --build-arg username=<user>'
 groupadd --gid ${gid} ${username}
 useradd --uid ${uid} --gid ${gid} --shell /bin/bash --create-home ${username}
 usermod -a -G sudo ${username}
