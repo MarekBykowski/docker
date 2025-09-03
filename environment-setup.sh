@@ -24,7 +24,7 @@ if [[ "$0" == "$BASH_SOURCE" ]]; then
 fi
 
 # List users permitted to use the docker eco-system
-keys=("rvranax" "csmx" "svellipx" "tziyangx" "tonyhunx" "markhox" "test1" "mbykowsx")
+keys=("rvranax" "csmx" "svellipx" "tziyangx" "tonyhunx" "markhox" "test2" "mbykowsx")
 vals=(11100 11200 11300 11400 11500 11600 11700 11800)
 
 # Test if a user running the script is on the list 
@@ -75,7 +75,6 @@ echo "export COMPOSE_PROJECT_NAME=$COMPOSE_PROJECT_NAME" >> $env_config_path
 # It sets `ports` array variable with the 6x ports, first three are for a 'b2b' container
 # and next three are for the 'yocto-ci' one). It relies on 'keys'-'vals' set above.
 source $env_dir/port-assignment.sh
-return
 ports=()
 count=1
 while [ "${#ports[@]}" -lt 6 ]; do
