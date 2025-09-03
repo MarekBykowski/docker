@@ -3,14 +3,12 @@
 # Check if the script is being sourced
 (return 0 2>/dev/null)
 if [ $? -eq 0 ]; then
-#echo "Script is being sourced"
-:
+	#echo "Script is being sourced"
+	:
 else
-echo "Script is being executed"
+	echo "Script is being executed"
 fi
 
-keys=("rvranax" "csmx" "svellipx" "tziyangx" "tonyhunx" "markhox" "test1" "mbykowsx")
-vals=(11100 11200 11300 11400 11500 11600 11700 11800)
 
 declare -A START_PORT_PER_USER
 for i in "${!keys[@]}"; do

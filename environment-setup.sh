@@ -23,6 +23,24 @@ if [[ "$0" == "$BASH_SOURCE" ]]; then
 	exit 1
 fi
 
+# List users permitted to use the docker eco-system
+keys=("rvranax" "csmx" "svellipx" "tziyangx" "tonyhunx" "markhox" "test1" "mbykowsx")
+vals=(11100 11200 11300 11400 11500 11600 11700 11800)
+
+# Test if a user running the script is on the list 
+for item in ${keys[@]}; do
+	if [[  $USER == $item ]]; then
+		found=1
+	fi
+done
+
+if [[ $found -ne 1 ]]; then
+	echo "User '$USER' not permitted to use docker eco-system"
+	echo "Ask admin to add the user '$USER' in"
+	echo "Current list of permitted users are: ${keys[@]}"
+	return 127
+fi
+
 env_setup_path=$(readlink -f $BASH_SOURCE)
 env_dir=$(dirname "$env_setup_path")
 env_setup_name=$(basename "$env_setup_path")
@@ -52,11 +70,12 @@ echo "echo \"Your Docker eco-system is named: $COMPOSE_PROJECT_NAME\"" >> $env_c
 echo "#COMPOSE_PROJECT_NAME is a compose defined var exported. Do not change its name!" >> $env_config_path
 echo "export COMPOSE_PROJECT_NAME=$COMPOSE_PROJECT_NAME" >> $env_config_path
 
-# Ports for container b2b
-# Ports must be unique system-wise and ideally remain the same at next compose run.
-# The algorithm for assigning the ports is in port-assignment.sh file.
-# It sets `ports` array variable with the 6x ports (3x for b2b and 3 for yocto-ci)
+# Ports must be unique system-wise and ideally remain unchanged at the consecutive runs.
+# The algorithm for assigning the ports is in a 'port-assignment.sh' file.
+# It sets `ports` array variable with the 6x ports, first three are for a 'b2b' container
+# and next three are for the 'yocto-ci' one). It relies on 'keys'-'vals' set above.
 source $env_dir/port-assignment.sh
+return
 ports=()
 count=1
 while [ "${#ports[@]}" -lt 6 ]; do
@@ -74,7 +93,7 @@ while [ "${#ports[@]}" -lt 6 ]; do
 	fi
 done
 
-# Ports for container b2b
+# Ports for the 'b2b' container
 D_B2B_SSH_PORT=${ports[0]}
 D_B2B_VNC_PORT=${ports[1]}
 D_B2B_NOVNC_PORT=${ports[2]}
@@ -87,7 +106,7 @@ echo "VNC port for b2b container is: $D_B2B_VNC_PORT"
 echo "NOVNC port for b2b container is: $D_B2B_NOVNC_PORT"
 EOF
 
-# Ports for container yocto-ci
+# Ports for the 'yocto-ci' container
 D_YOCTO_CI_SSH_PORT=${ports[3]}
 D_YOCTO_CI_VNC_PORT=${ports[4]}
 D_YOCTO_CI_NOVNC_PORT=${ports[5]}
