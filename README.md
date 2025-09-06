@@ -2,12 +2,6 @@
 
 A lightweight (519 MB) Linux workstation based on [Ubuntu](https://ubuntu.com/). Provides a **graphical desktop**, and **VNC** / **SSH** access.
 
-*Ramon Solano (ramon.solano at gmail.com)*
-
-**Last update**: Mar/3/2021.  
-**Base image**: [Ubuntu 20.04 (focal-20210119)](https://hub.docker.com/_/ubuntu)
-
-
 ## Main packages
 
 * **xfce4**   : Graphic desktop environment
@@ -19,54 +13,12 @@ A lightweight (519 MB) Linux workstation based on [Ubuntu](https://ubuntu.com/).
 | User   | pwd    |
 | ------ | ------ |
 | root   | ubuntu |
-| ubuntu | ubuntu |
+| ubuntu | ubuntu | with Dockerfile-ubuntu
+| marek  | marek  | with Dockerfile-marek
 
-## Usage (synopsis)
+## To locally build the image from the `Dockerfile`
 
-1. (Optional) Download (*pull*) the image from its [docker hub repository](https://cloud.docker.com/u/rsolano/repository/docker/rsolano/ubuntu-vnc). 
-
-	If this step is not done first and the image does not previously exists in your local computer, the image will be downloaded later by the `docker run` command:
-
-   ```sh
-   $ docker pull rsolano/ubuntu-vnc
-   ```
-
-2. Run the container.
-
-	For example:
-
-	* To run an ephemeral VNC session (port 5900):
-
-		```sh
-	   $ docker run --rm -p 5900:5900 rsolano/ubuntu-vnc
-	   ```
-	   
-	* To run an ephemeral VNC + SSH session (port 5900 and 2222):
-
-		```sh
-	   $ docker run --rm -p 5900:5900 -p 2222:22 rsolano/ubuntu-vnc
-	   ```
-   
-3. Connect to the virtual computer using a VNC viewer (such as the [RealVNC viewer](https://www.realvnc.com/en/connect/download/viewer/)).
-
-	**Note**: As the remote VNC port 5900 was forwarded to the local host port 5900 (by `-p 5900:5900`), you can connect to:
-
-	```
-	localhost:5900
-	```
-	
-4. Connect to the virtual computer using a SSH connection.
-
-	**Note**: As the remote SSHD port 22 was forwarded to the local host port 2222 (by `-p 2222:22`), you can connect to:
-	
-	```sh
-	$ ssh -p 2222 ubuntu@localhost
-	```
-
-
-## To locally build the image from the `Dockerfile` (optional, for developers only)
-
-If you want to customize the image or use it for creating a new one based on this configuration, you can download (*clone*) the full image files from the [corresponding github repository](https://github.com/rwildcat/docker_ubuntu-vnc). 
+TODO: update here
 
 ```sh
 # clone git repository
