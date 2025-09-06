@@ -16,7 +16,6 @@ A lightweight (519 MB) Linux workstation based on [Ubuntu](https://ubuntu.com/).
 
 ## Users
 
-
 | User   | pwd    |
 | ------ | ------ |
 | root   | ubuntu |
