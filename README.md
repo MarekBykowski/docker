@@ -19,21 +19,21 @@ A lightweight (519 MB) Linux workstation based on [Ubuntu](https://ubuntu.com/).
 
 
 ```sh
-docker build --progress=plain -t marekbykowski/ubuntu-vnc:22.04 .
+docker build --progress=plain -t marekbykowski/generic-purpose:22.04 .
 ```
 
 If you want to build from pristine, eg. re-copy an updated file to an image then run with `--no-cache`
 ```sh
-docker build --no-cache --progress=plain -t marekbykowski/ubuntu-vnc:22.04 .
+docker build --no-cache --progress=plain -t marekbykowski/generic-purpose:22.04 .
 ```
 
 If any of your commands in Dockerfile require proxy provide it with the build as this
 ```sh
-docker build --build-arg HTTP_PROXY="http://proxy-us.intel.com:911" --build-arg HTTPS_PROXY="https_proxy=http://proxy-us.intel.com:912" --progress=plain -t marekbykowski/ubuntu-vnc:22.04 .
+docker build --build-arg HTTP_PROXY="http://proxy-us.intel.com:911" --build-arg HTTPS_PROXY="https_proxy=http://proxy-us.intel.com:912" --progress=plain -t marekbykowski/generic-purpose:22.04 .
 ```
 
 ```sh
-docker build --no-cache --build-arg HTTP_PROXY="http://proxy-us.intel.com:911" --build-arg HTTPS_PROXY="https_proxy=http://proxy-us.intel.com:912" --progress=plain -t marekbykowski/ubuntu-vnc:22.04 .
+docker build --no-cache --build-arg HTTP_PROXY="http://proxy-us.intel.com:911" --build-arg HTTPS_PROXY="https_proxy=http://proxy-us.intel.com:912" --progress=plain -t marekbykowski/generic-purpose:22.04 .
 ```
 
 ---
@@ -43,7 +43,7 @@ docker build --no-cache --build-arg HTTP_PROXY="http://proxy-us.intel.com:911" -
 **Full syntax:**
 
 ```sh
-$ docker run [-it] [--rm] [--detach] [-h HOSTNAME] -p LVNCPORT:5900 -p LSSHPORT:22 [-e XRES=1280x800x24] [-e TZ={TZArea/TZCity}] [-v LDIR:DIR] marekbykowski/ubuntu-vnc:22.04
+$ docker run [-it] [--rm] [--detach] [-h HOSTNAME] -p LVNCPORT:5900 -p LSSHPORT:22 [-e XRES=1280x800x24] [-e TZ={TZArea/TZCity}] [-v LDIR:DIR] marekbykowski/generic-purpose:22.04
 ```
 
 where:
@@ -61,7 +61,7 @@ where:
 ### Examples
 
 ```sh
-docker run --rm --name marek --hostname my-docker -p 7660:22 -p 7661:5900 -p 7662:6080 --privileged -e XRES=1920x966x24 marekbykowski/ubuntu-vnc:22.04
+docker run --rm --name marek --hostname my-docker -p 7660:22 -p 7661:5900 -p 7662:6080 --privileged -e XRES=1920x966x24 marekbykowski/generic-purpose:22.04
 ```
 
 #### To run a ***secured*** VNC session
