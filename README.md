@@ -10,35 +10,40 @@ A lightweight (519 MB) Linux workstation based on [Ubuntu](https://ubuntu.com/).
 
 ## Users
 
-| User   | pwd    |
-| ------ | ------ |
-| root   | ubuntu |
-| ubuntu | ubuntu | with Dockerfile-ubuntu
-| marek  | marek  | with Dockerfile-marek
+| User   |
+| ------ |
+| root   |
+| marek  |
 
 ## To locally build the image from the `Dockerfile`
 
-TODO: update here
 
 ```sh
-# clone git repository
-$ git clone https://github.com/rwildcat/docker_ubuntu-vnc.git
+docker build --progress=plain -t marekbykowski/ubuntu-vnc:22.04 .
+```
 
-# build image
-$ cd docker_ubuntu-vnc
-$ docker build -t rsolano/ubuntu-vnc .
+If you want to build from pristine, eg. re-copy an updated file to an image then run with `--no-cache`
+```sh
+docker build --no-cache --progress=plain -t marekbykowski/ubuntu-vnc:22.04 .
+```
+
+If any of your commands in Dockerfile require proxy provide it with the build as this
+```sh
+docker build --build-arg HTTP_PROXY="http://proxy-us.intel.com:911" --build-arg HTTPS_PROXY="https_proxy=http://proxy-us.intel.com:912" --progress=plain -t marekbykowski/ubuntu-vnc:22.04 .
+```
+
+```sh
+docker build --no-cache --build-arg HTTP_PROXY="http://proxy-us.intel.com:911" --build-arg HTTPS_PROXY="https_proxy=http://proxy-us.intel.com:912" --progress=plain -t marekbykowski/ubuntu-vnc:22.04 .
 ```
 
 ---
 
 ## Usage (full syntax)
 
-To run the container, you can just issue the `$ docker run <image-name>` command. The image will be first *pulled* if it not previously done:
-
 **Full syntax:**
 
 ```sh
-$ docker run [-it] [--rm] [--detach] [-h HOSTNAME] -p LVNCPORT:5900 -p LSSHPORT:22 [-e XRES=1280x800x24] [-e TZ={TZArea/TZCity}] [-v LDIR:DIR] rsolano/ubuntu-vnc
+$ docker run [-it] [--rm] [--detach] [-h HOSTNAME] -p LVNCPORT:5900 -p LSSHPORT:22 [-e XRES=1280x800x24] [-e TZ={TZArea/TZCity}] [-v LDIR:DIR] marekbykowski/ubuntu-vnc:22.04
 ```
 
 where:
@@ -55,27 +60,13 @@ where:
 
 ### Examples
 
-* Tipical usage, no shared directories: run the image, remove container from memory once finished the container (`--rm`); map VNC port to 5900 (`-p 5900:5900`) and SSH port to 2222 (`-p 2222:22`):
-
-	```sh
-	$ docker run --rm -p 5900:5900 -p 2222:22 rsolano/ubuntu-vnc
-	```
-
-* Tipical usage, shared directories: run image, remove container from memory once finished the container; map VNC port to 5900 and SSH port to 2222; mount local `$HOME/workspace` on container's `/home/ubuntu/workspace` (`-v $HOME/...`):
-
-	```sh
-	$ docker run --rm -p 5900:5900 -p 2222:22 -v $HOME/workspace:/home/ubuntu/workspace rsolano/ubuntu-vnc
-	```
-
-* Run image, detach to background (`--detach`, or just `-d`) and keep running in memory (control returns to user immediately); map VNC to 5900 and SSH to 2222; change screen resolution to 1200x700x24 (`XRES=...`)
-
-	```sh
-	$ docker run --detach -p 5900:5900 -p 2222:22 -e XRES=1200x700x24 rsolano/ubuntu-vnc
-	```
+```sh
+docker run --rm --name marek --hostname my-docker -p 7660:22 -p 7661:5900 -p 7662:6080 --privileged -e XRES=1920x966x24 marekbykowski/ubuntu-vnc:22.04
+```
 
 #### To run a ***secured*** VNC session
 
-This container is intended to be used as a *personal* graphic workstation, running in your local Docker engine. For this reason, no encryption for VNC is provided. 
+This container is intended to be used as a *personal* graphic workstation, running in your local Docker engine. For this reason, no encryption for VNC is provided.
 
 If you need to have an encrypted connection as for example for running this image in a remote host (*e.g.* AWS, Google Cloud, etc.), the VNC stream can be encrypted through a SSH connection:
 
@@ -96,15 +87,15 @@ This example assume the SSH connection will be terminated after 60 seconds if no
 
 * Establish a secured VNC session to the remote host 140.172.18.21, keep open a SSH terminal to the remote host. Map remote 5900 port to local 5900 port. Assume remote SSH port is 22:
 
-	```sh
-	$ ssh -L 5900:140.172.18.21:5900 ubuntu@140.172.18.21
-	```
+```sh
+$ ssh -L 5900:140.172.18.21:5900 ubuntu@140.172.18.21
+```
 
 * As before, but do not keep a SSH session open, but send the connecction to the background. End SSH channel if no VNC connection is made in 60 s, or after the VNC session ends:
 
-	```sh
-	$ ssh -f -L 5900:140.172.18.21:5900 ubuntu@140.172.18.21 sleep 60
-	```
+```sh
+$ ssh -f -L 5900:140.172.18.21:5900 ubuntu@140.172.18.21 sleep 60
+```
 
 Once VNC is tunneled through SSH, you can connect your VNC viewer to you specified localhot port (*e.g.* port 5900 as in this examples).
 
@@ -120,36 +111,20 @@ Once VNC is tunneled through SSH, you can connect your VNC viewer to you specifi
   * Just press `CTRL-C` in the console (non-interactive) terminal.
 
 
-* If running *detached* (background) session:
-
-	1. Look for the container Id with `docker ps`:   
-	
-		```
-		$ docker ps
-		CONTAINER ID        IMAGE                     COMMAND                  CREATED             STATUS              PORTS                                          NAMES
-		ac46f0cf41d1        rsolano/ubuntu-vnc   "/usr/bin/supervisor…"   58 seconds ago      Up 57 seconds       0.0.0.0:5900->5900/tcp, 0.0.0.0:2222->22/tcp   wizardly_bohr
-		```
-
-	2. Stop the desired container Id (ac46f0cf41d1 in this case):
-
-		```sh
-		$ docker stop ac46f0cf41d1
-		```
-		
  ## Container usage
- 
+
 1. First run the container as described above.
 
 2. Connect to the running host (`localhost` if running in your computer):
 
-	* Using VNC: 
+	* Using VNC:
 
 		Connect to specified LVNCPORT (e.g. `localhost:0` or `localhost:5900`)
-		 
-	* Using SSH: 
 
-		Connect to specified host (e.g. `localhost`) and SSHPORT (e.g. 2222) 
-		
+	* Using SSH:
+
+		Connect to specified host (e.g. `localhost`) and SSHPORT (e.g. 2222)
+
 		```sh
 		$ ssh -p 2222 ubuntu@localhost
 		```
@@ -158,7 +133,7 @@ Once VNC is tunneled through SSH, you can connect your VNC viewer to you specifi
 
     ./etc/supervisor.conf
 
-### File contents:    
+### File contents:
 
 ```
 [supervisord]
@@ -177,7 +152,7 @@ priority=100
 environment = DISPLAY=":1",XAUTHLOCALHOSTNAME="localhost"
 command=/usr/bin/x11vnc -repeat -xkb -noxrecord -noxfixes -noxdamage -wait 10 -shared -permitfiletransfer -tightfilexfer
 autorestart = true
-priority=200 
+priority=200
 
 [program:startxfce4]
 environment = USER="ubuntu",HOME="/home/ubuntu",DISPLAY=":1"

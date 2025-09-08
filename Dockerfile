@@ -1,12 +1,16 @@
 FROM ubuntu:22.04
 
 # default screen size
-ENV XRES=1280x800x24
+ENV XRES=1280x966x24
 
 # default tzdata
 ENV TZ=Etc/UTC
 
 ENV DEBIAN_FRONTEND=noninteractive
+
+# apt-conf includes the http proxy for apt for Intel.
+# Use it only if you are behid the Proxy
+#COPY apt.conf /etc/apt/
 
 # install ubuntu filares (xfce, vnc, novnc, etc.)
 RUN <<EOF
@@ -38,21 +42,23 @@ apt-get -y install cpu-checker
 apt-get -y install perl libterm-readkey-perl
 apt-get -y install libpixman-1-0 libpixman-1-dev
 apt-get -y install libglib2.0-0
-#required from sv
 apt-get -y install dc time
 EOF
 
-
 # Install firefox outside of snap
-RUN install -d -m 0755 /etc/apt/keyrings
-RUN wget -q https://packages.mozilla.org/apt/repo-signing-key.gpg -O- | sudo tee /etc/apt/keyrings/packages.mozilla.org.asc > /dev/null
-RUN gpg -n -q --import --import-options import-show /etc/apt/keyrings/packages.mozilla.org.asc | awk '/pub/{getline; gsub(/^ +| +$/,""); if($0 == "35BAA0B33E9EB396F59CA838C0BA5CE6DC6315A3") print "\nThe key fingerprint matches ("$0").\n"; else print "\nVerification failed: the fingerprint ("$0") does not match the expected one.\n"}'
-RUN echo "deb [signed-by=/etc/apt/keyrings/packages.mozilla.org.asc] https://packages.mozilla.org/apt mozilla main" | sudo tee -a /etc/apt/sources.list.d/mozilla.list > /dev/null
-RUN echo '\n\
-Package: * \n\
-Pin: origin packages.mozilla.org \n\
-Pin-Priority: 1000' | tee /etc/apt/preferences.d/mozilla
-RUN apt-get update && apt-get -y install firefox
+RUN apt-get -y update && apt-get -y install firefox
+
+# Install firefox - alternative method if the above doesn't work
+#RUN install -d -m 0755 /etc/apt/keyrings
+#RUN wget -q https://packages.mozilla.org/apt/repo-signing-key.gpg -O- | sudo tee /etc/apt/keyrings/packages.mozilla.org.asc > /dev/null
+#RUN gpg -n -q --import --import-options import-show /etc/apt/keyrings/packages.mozilla.org.asc | awk '/pub/{getline; gsub(/^ +| +$/,""); if($0 == "35BAA0B33E9EB396F59CA838C0BA5CE6DC6315A3") print "\nThe key fingerprint matches ("$0").\n"; else print "\nVerification failed: the fingerprint ("$0") does not match the expected one.\n"}'
+#RUN echo "deb [signed-by=/etc/apt/keyrings/packages.mozilla.org.asc] https://packages.mozilla.org/apt mozilla main" | sudo tee -a /etc/apt/sources.list.d/mozilla.list > /dev/null
+#RUN echo '\n\
+#Package: * \n\
+#Pin: origin packages.mozilla.org \n\
+#Pin-Priority: 1000' | tee /etc/apt/preferences.d/mozilla
+#RUN cat /etc/apt/sources.list.d/mozilla.list
+#RUN apt-get update && apt-get -y install firefox
 
 # cleanup and fix
 RUN <<EOF
@@ -66,10 +72,10 @@ EOF
 RUN mkdir /run/sshd
 
 # users and groups
-RUN echo "root:ubuntu" | /usr/sbin/chpasswd \
-    && useradd -m ubuntu -s /bin/bash \
-    && echo "ubuntu:ubuntu" | /usr/sbin/chpasswd \
-    && echo "ubuntu    ALL=(ALL) ALL" >> /etc/sudoers
+RUN echo "root:marian12" | /usr/sbin/chpasswd \
+  && useradd -m marek -s /bin/bash \
+  && echo "marek:marian12" | /usr/sbin/chpasswd \
+  && echo "marek    ALL=(ALL) ALL" >> /etc/sudoers
 
 # add my sys config files
 ADD etc /etc
@@ -77,14 +83,14 @@ ADD etc /etc
 # user config files
 
 # terminal
-ADD config/xfce4/terminal/terminalrc /home/ubuntu/.config/xfce4/terminal/terminalrc
+ADD config/xfce4/terminal/terminalrc /home/marek/.config/xfce4/terminal/terminalrc
 # wallpaper
-ADD config/xfce4/xfconf/xfce-perchannel-xml/xfce4-desktop.xml /home/ubuntu/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-desktop.xml
+ADD config/xfce4/xfconf/xfce-perchannel-xml/xfce4-desktop.xml /home/marek/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-desktop.xml
 # icon theme
-ADD config/xfce4/xfconf/xfce-perchannel-xml/xsettings.xml /home/ubuntu/.config/xfce4/xfconf/xfce-perchannel-xml/xsettings.xml
+ADD config/xfce4/xfconf/xfce-perchannel-xml/xsettings.xml /home/marek/.config/xfce4/xfconf/xfce-perchannel-xml/xsettings.xml
 
 # TZ, aliases
-RUN cd /home/ubuntu \
+RUN cd /home/marek \
   && echo 'export TZ=/usr/share/zoneinfo/$TZ' >> .bashrc \
   && sed -i 's/#alias/alias/' .bashrc  \
   && echo "alias lla='ls -al'" 		>> .bashrc \
@@ -95,11 +101,15 @@ RUN cd /home/ubuntu \
   && echo "alias hh=history" 			>> .bashrc \
   && echo "alias hhg='history|grep -i" '"$@"' "'" >> .bashrc
 
+
+# .bash_aliases include MOTD and proxies. Use it only if you are behind proxy
+#COPY .bash_aliases /home/marek
+
 # set owner
-RUN chown -R ubuntu:ubuntu /home/ubuntu/.*
+RUN chown -R marek:marek /home/marek
 
 # ports
 EXPOSE 22 5900 6080
 
-# # default command
+# default command
 CMD ["/usr/bin/supervisord","-c","/etc/supervisord.conf"]
