@@ -1,6 +1,5 @@
 #!/bin/bash
 
-
 # All of the values must be unique per user.
 # As the values are exported to the system and available for all the processes
 # I use prefix D_ for indicating this is for Docker containers.
@@ -24,8 +23,12 @@ if [[ "$0" == "$BASH_SOURCE" ]]; then
 fi
 
 # List users permitted to use the docker eco-system
-keys=("rvranax" "csmx" "svellipx" "tziyangx" "tonyhunx" "markhox" "test2" "mbykowsx")
-vals=(11100 11200 11300 11400 11500 11600 11700 11800)
+keys=("mbykowsx")
+vals=(12800)
+declare -A START_PORT_PER_USER
+for i in "${!keys[@]}"; do
+	START_PORT_PER_USER[${keys[$i]}]=${vals[$i]}
+done
 
 # Test if a user running the script is on the list 
 for item in ${keys[@]}; do
@@ -53,7 +56,6 @@ test -f $env_config_path && {
 	echo -e "\t'source $env_config_path'"
 	echo "If you want to create an updated config file remove this one and re-resource the script, eg."
 	echo -e "\t'rm -f $env_config_path && source $env_setup_path'"
-
 	return 127
 }
 # Common values shared by two containers
@@ -70,27 +72,35 @@ echo "echo \"Your Docker eco-system is named: $COMPOSE_PROJECT_NAME\"" >> $env_c
 echo "#COMPOSE_PROJECT_NAME is a compose defined var exported. Do not change its name!" >> $env_config_path
 echo "export COMPOSE_PROJECT_NAME=$COMPOSE_PROJECT_NAME" >> $env_config_path
 
-# Ports must be unique system-wise and ideally remain unchanged at the consecutive runs.
+# Ports must be unique system-wise and ideally remain unchanged to the end of life of containeres.
 # The algorithm for assigning the ports is in a 'port-assignment.sh' file.
-# It sets `ports` array variable with the 6x ports, first three are for a 'b2b' container
-# and next three are for the 'yocto-ci' one). It relies on 'keys'-'vals' set above.
+# I need ports for:
+# b2b, yocto-ci, generic, yocto-build
+NUMBER_OF_PORTS=12
+
+# Range of ports to check
+START_PORT=${START_PORT_PER_USER[$USER]}
+# It will search a NUMBER_OF_PORTS in the range from START_PORT thr END_PORT
+END_PORT=$((START_PORT+30))
 source $env_dir/port-assignment.sh
 ports=()
-count=1
-while [ "${#ports[@]}" -lt 6 ]; do
+count=0
+while [ "${#ports[@]}" -lt $NUMBER_OF_PORTS ]; do
 	port=$(echo_free_port $START_PORT)
 	if [[ ! " ${ports[*]} " =~ " $port " ]]; then
 		ports+=($port)
 		((START_PORT+=1))
 	fi
 	((count++))
-	if [[ $count -eq 11 ]]; then
-		echo "Cannot allocate available ports in the range set $START_PORT..$END_PORT. Maybe the docker eco-system is up and running."
+	if [[ $count -eq $END_PORT ]]; then
+		echo "Cannot allocate $NUMBER_OF_PORTS ports in the range set $START_PORT..$END_PORT. Maybe the docker eco-system is up and running."
 		echo "If so before re-creating the configuration you have to stop the docker eco-system first, eg."
 		echo -e "\t'source $env_config_path && $env_dir/run.sh down'"
 		return 127
 	fi
 done
+
+echo "mb: ports ${ports[@]}"
 
 # Ports for the 'b2b' container
 D_B2B_SSH_PORT=${ports[0]}
@@ -116,6 +126,33 @@ cat << EOF >> $env_config_path
 echo "SSH port for yocto-ci container is: $D_YOCTO_CI_SSH_PORT"
 echo "VNC port for yocto-ci container is: $D_YOCTO_CI_VNC_PORT"
 echo "NOVNC port for yocto-ci container is: $D_YOCTO_CI_NOVNC_PORT"
+EOF
+
+# Ports for the 'generic' container
+D_GENERIC_SSH_PORT=${ports[6]}
+D_GENERIC_VNC_PORT=${ports[7]}
+D_GENERIC_NOVNC_PORT=${ports[8]}
+echo "export D_GENERIC_SSH_PORT=$D_GENERIC_SSH_PORT" >> $env_config_path
+echo "export D_GENERIC_VNC_PORT=$D_GENERIC_VNC_PORT" >> $env_config_path
+echo "export D_GENERIC_NOVNC_PORT=$D_GENERIC_NOVNC_PORT" >> $env_config_path
+cat << EOF >> $env_config_path
+echo "SSH port for generic container is: $D_GENERIC_SSH_PORT"
+echo "VNC port for generic container is: $D_GENERIC_VNC_PORT"
+echo "NOVNC port for generic container is: $D_GENERIC_NOVNC_PORT"
+EOF
+
+# Ports for the 'yocto' container
+D_YOCTO_SSH_PORT=${ports[9]}
+D_YOCTO_VNC_PORT=${ports[10]}
+D_YOCTO_NOVNC_PORT=${ports[11]}
+echo "export D_YOCTO_SSH_PORT=$D_YOCTO_SSH_PORT" >> $env_config_path
+echo "export D_YOCTO_VNC_PORT=$D_YOCTO_VNC_PORT" >> $env_config_path
+echo "export D_YOCTO_NOVNC_PORT=$D_YOCTO_NOVNC_PORT" >> $env_config_path
+cat << EOF >> $env_config_path
+echo "SSH port for yocto container is: $D_YOCTO_SSH_PORT"
+echo "VNC port for yocto container is: $D_YOCTO_VNC_PORT"
+echo "NOVNC port for yocto container is: $D_YOCTO_NOVNC_PORT"
+
 EOF
 cat << EOF >> $env_config_path
 export GIT_AUTH_TOKEN="g\

@@ -38,15 +38,15 @@ apt-get -y update && apt-get -y install build-essential chrpath cpio debianutils
   python3-jinja2 python3-pexpect python3-pip python3-subunit socat texinfo unzip \
   wget xz-utils zstd iproute2
 apt-get -y install sudo vim tmux gzip unzip git cpu-checker  perl libterm-readkey-perl \
- libpixman-1-0 libpixman-1-dev  libglib2.0-0 \
+  libpixman-1-0 libpixman-1-dev  libglib2.0-0 \
 # required from sv
- dc time libelf1
+  dc time libelf1
 # install GUI, vnc, novnc
 apt-get install -y --no-install-recommends apt-utils sudo supervisor vim \
-   openssh-server \
-   xserver-xorg xvfb x11vnc dbus-x11 xfce4 \
-   xfce4-terminal xfce4-xkb-plugin \
-   novnc websockify
+  openssh-server \
+  xserver-xorg xvfb x11vnc dbus-x11 xfce4 \
+  xfce4-terminal xfce4-xkb-plugin \
+  novnc websockify
 EOF
 
 # Some bits of yocto-ci require this

@@ -10,15 +10,6 @@ else
 fi
 
 
-declare -A START_PORT_PER_USER
-for i in "${!keys[@]}"; do
-	START_PORT_PER_USER[${keys[$i]}]=${vals[$i]}
-done
-
-# Range of ports to check
-START_PORT=${START_PORT_PER_USER[$USER]}
-END_PORT=$((START_PORT+9))
-
 # Function to check if a port is in use
 is_port_in_use() {
 	local port=$1

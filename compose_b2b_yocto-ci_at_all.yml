@@ -1,0 +1,139 @@
+services:
+  b2b:
+    image: ${D_USER:?error}-b2b:ubuntu
+    container_name: ${D_USER:?error}-b2b
+    build:
+      context: ./dockerfile-b2b
+      dockerfile: Dockerfile-b2b
+      #entitlements:
+      #- security.insecure
+      #no_cache: true
+      args:
+        - username=${D_USER:?error}
+        - gid=${D_GID:?error}
+        - uid=${D_UID:?error}
+        - password=${D_PASSWORD:?error}
+          #- HTTP_PROXY=${D_HTTP_PROXY:?error}
+          #- HTTPS_PROXY=${D_HTTPS_PROXY:?error}
+    volumes:
+        - ${D_HOME:?error}:${D_HOME:?error}/host
+    ports:
+      - '${D_B2B_SSH_PORT:?error}:22'
+      - '${D_B2B_VNC_PORT:?error}:5900'
+      - '${D_B2B_NOVNC_PORT:?error}:6080'
+    privileged: true
+    hostname: b2b
+    networks:
+      - network-b2b-yocto-ci-at-all
+    #stdin_open: true # docker run -i
+    #tty: true        # docker run -t
+
+  yocto-ci:
+    image: ${D_USER:?error}-yocto-ci:ubuntu
+    container_name: ${D_USER:?error}-yocto-ci
+    build:
+      context: ./dockerfile-yocto-ci
+      dockerfile: Dockerfile-yocto-ci
+        #entitlements:
+        #- security.insecure
+        #no_cache: true
+      args:
+        - username=${D_USER:?error}
+        - gid=${D_GID:?error}
+        - uid=${D_UID:?error}
+        - password=${D_PASSWORD:?error}
+        - gt=${GIT_AUTH_TOKEN:?error}
+        - HTTP_PROXY=${D_HTTP_PROXY:?error}
+        - HTTPS_PROXY=${D_HTTPS_PROXY:?error}
+    volumes:
+        - ${D_HOME:?error}:${D_HOME:?error}/host
+          #- shared-volume:/home/${D_USER:?error}
+    ports:
+      - '${D_YOCTO_CI_SSH_PORT:?error}:22'
+      - '${D_YOCTO_CI_VNC_PORT:?error}:5900'
+      - '${D_YOCTO_CI_NOVNC_PORT:?error}:6080'
+    privileged: true
+      #environment:
+      #- HTTP_PROXY=${D_HTTP_PROXY:?error}
+      #- HTTPS_PROXY=${D_HTTPS_PROXY:?error}
+    hostname: yocto-ci
+    networks:
+      - network-b2b-yocto-ci-at-all
+    #stdin_open: true # docker run -i
+    #tty: true        # docker run -t
+
+  generic:
+    image: ${D_USER:?error}-generic:ubuntu
+    container_name: ${D_USER:?error}-generic
+    build:
+      context: ./dockerfile-generic
+      dockerfile: Dockerfile-generic
+        #entitlements:
+        #- security.insecure
+      no_cache: true
+      args:
+        - username=${D_USER:?error}
+        - gid=${D_GID:?error}
+        - uid=${D_UID:?error}
+        - password=${D_PASSWORD:?error}
+        - gt=${GIT_AUTH_TOKEN:?error}
+        - HTTP_PROXY=${D_HTTP_PROXY:?error}
+        - HTTPS_PROXY=${D_HTTPS_PROXY:?error}
+    volumes:
+        - ${D_HOME:?error}:${D_HOME:?error}/host
+        - /lib/modules:/lib/modules
+          #- shared-volume:/home/${D_USER:?error}
+    ports:
+      - '${D_GENERIC_SSH_PORT:?error}:22'
+      - '${D_GENERIC_VNC_PORT:?error}:5900'
+      - '${D_GENERIC_NOVNC_PORT:?error}:6080'
+    privileged: true
+      #environment:
+      #- HTTP_PROXY=${D_HTTP_PROXY:?error}
+      #- HTTPS_PROXY=${D_HTTPS_PROXY:?error}
+    hostname: generic
+    networks:
+      - network-b2b-yocto-ci-at-all
+    #stdin_open: true # docker run -i
+    #tty: true        # docker run -t
+
+  yocto:
+    image: ${D_USER:?error}-yocto:ubuntu
+    container_name: ${D_USER:?error}-yocto
+    build:
+      context: ./dockerfile-yocto
+      dockerfile: Dockerfile-yocto
+        #entitlements:
+        #- security.insecure
+      no_cache: true
+      args:
+        - username=${D_USER:?error}
+        - gid=${D_GID:?error}
+        - uid=${D_UID:?error}
+        - password=${D_PASSWORD:?error}
+        - gt=${GIT_AUTH_TOKEN:?error}
+        - HTTP_PROXY=${D_HTTP_PROXY:?error}
+        - HTTPS_PROXY=${D_HTTPS_PROXY:?error}
+    volumes:
+        - ${D_HOME:?error}:${D_HOME:?error}/host
+          #- shared-volume:/home/${D_USER:?error}
+    ports:
+      - '${D_YOCTO_SSH_PORT:?error}:22'
+      - '${D_YOCTO_VNC_PORT:?error}:5900'
+      - '${D_YOCTO_NOVNC_PORT:?error}:6080'
+    privileged: true
+      #environment:
+      #- HTTP_PROXY=${D_HTTP_PROXY:?error}
+      #- HTTPS_PROXY=${D_HTTPS_PROXY:?error}
+    hostname: yocto
+    networks:
+      - network-b2b-yocto-ci-at-all
+    #stdin_open: true # docker run -i
+    #tty: true        # docker run -t
+
+#volumes:
+#    shared-volume:
+
+networks:
+  network-b2b-yocto-ci-at-all:
+    driver: bridge
