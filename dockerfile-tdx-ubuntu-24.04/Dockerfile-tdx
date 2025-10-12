@@ -42,7 +42,7 @@ apt-get -y install sudo vim tmux gzip unzip git cpu-checker  perl libterm-readke
 # required from sv
   dc time libelf1
 # install kmod (modprobe) gh, slirp, libslirp, etc.
-apt-get -y kmod gh libslirp-dev sphinx-basic-ng python3-sphinx-rtd-theme \
+apt-get install -y kmod gh libslirp-dev sphinx-basic-ng python3-sphinx-rtd-theme \
   ninja-build pkg-config libglib2.0-dev
 # install GUI, vnc, novnc
 apt-get install -y --no-install-recommends apt-utils sudo supervisor vim \
@@ -86,6 +86,14 @@ RUN git clone --branch nanbield https://${gt}@github.com/MarekBykowski/poky.git 
 #ADD https://${gt}@github.com/MarekBykowski/meta-cxl.git#nanbield /home/${username}/yocto/meta-cxl
 RUN git clone --branch nanbield https://${gt}@github.com/MarekBykowski/meta-cxl.git /home/${username}/yocto/meta-cxl
 ADD https://git.openembedded.org/meta-openembedded.git#nanbield /home/${username}/yocto/meta-openembedded
+
+# Clone tdx help scripts and qemu itself, install it afterwards
+RUN mkdir -p /home/${username}/repos
+RUN git clone --branch master https://${gt}@github.com/MarekBykowski/virtualization.hypervisors.server.vmm.qemu-bkc-generic-qemu8.1rc0-kernel6.6-v4.1.git /home/${username}/repos/qemu
+WORKDIR /home/${username}/repos/qemu
+RUN ./configure --enable-slirp --target-list=x86_64-softmmu --prefix=/usr/local/qemu --disable-werror && \
+  make -j$(nproc) && make install
+RUN git clone --branch master https://${gt}@github.com/MarekBykowski/qemu-tpa-td.git /home/${username}/repos/qemu-tpa-td
 
 RUN chown -v -R ${username}:${username} /home/${username}
 
