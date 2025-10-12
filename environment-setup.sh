@@ -75,8 +75,9 @@ echo "export COMPOSE_PROJECT_NAME=$COMPOSE_PROJECT_NAME" >> $env_config_path
 # Ports must be unique system-wise and ideally remain unchanged to the end of life of containeres.
 # The algorithm for assigning the ports is in a 'port-assignment.sh' file.
 # I need ports for:
-# b2b, yocto-ci, generic, yocto-build
-NUMBER_OF_PORTS=12
+echo "Doing ports for: b2b, yocto-ci, generic, yocto, tdx"
+NUMBER_OF_PORTS=15
+echo "... so total number of ports looked for is: $NUMBER_OF_PORTS"
 
 # Range of ports to check
 START_PORT=${START_PORT_PER_USER[$USER]}
@@ -100,7 +101,7 @@ while [ "${#ports[@]}" -lt $NUMBER_OF_PORTS ]; do
 	fi
 done
 
-echo "mb: ports ${ports[@]}"
+echo "Ports allocated: ${ports[@]}"
 
 # Ports for the 'b2b' container
 D_B2B_SSH_PORT=${ports[0]}
@@ -152,8 +153,21 @@ cat << EOF >> $env_config_path
 echo "SSH port for yocto container is: $D_YOCTO_SSH_PORT"
 echo "VNC port for yocto container is: $D_YOCTO_VNC_PORT"
 echo "NOVNC port for yocto container is: $D_YOCTO_NOVNC_PORT"
-
 EOF
+
+# Ports for the 'tdx' container
+D_TDX_SSH_PORT=${ports[12]}
+D_TDX_VNC_PORT=${ports[13]}
+D_TDX_NOVNC_PORT=${ports[14]}
+echo "export D_TDX_SSH_PORT=$D_TDX_SSH_PORT" >> $env_config_path
+echo "export D_TDX_VNC_PORT=$D_TDX_VNC_PORT" >> $env_config_path
+echo "export D_TDX_NOVNC_PORT=$D_TDX_NOVNC_PORT" >> $env_config_path
+cat << EOF >> $env_config_path
+echo "SSH port for tdx container is: $D_TDX_SSH_PORT"
+echo "VNC port for tdx container is: $D_TDX_VNC_PORT"
+echo "NOVNC port for tdx container is: $D_TDX_NOVNC_PORT"
+EOF
+
 cat << EOF >> $env_config_path
 export GIT_AUTH_TOKEN="g\
 hp_FU32\

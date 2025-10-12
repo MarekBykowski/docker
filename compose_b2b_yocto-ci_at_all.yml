@@ -17,6 +17,8 @@ services:
           #- HTTPS_PROXY=${D_HTTPS_PROXY:?error}
     volumes:
         - ${D_HOME:?error}:${D_HOME:?error}/host
+        - /lib/modules:/lib/modules
+        - /boot:/boot
     ports:
       - '${D_B2B_SSH_PORT:?error}:22'
       - '${D_B2B_VNC_PORT:?error}:5900'
@@ -47,6 +49,8 @@ services:
         - HTTPS_PROXY=${D_HTTPS_PROXY:?error}
     volumes:
         - ${D_HOME:?error}:${D_HOME:?error}/host
+        - /lib/modules:/lib/modules
+        - /boot:/boot
           #- shared-volume:/home/${D_USER:?error}
     ports:
       - '${D_YOCTO_CI_SSH_PORT:?error}:22'
@@ -82,6 +86,7 @@ services:
     volumes:
         - ${D_HOME:?error}:${D_HOME:?error}/host
         - /lib/modules:/lib/modules
+        - /boot:/boot
           #- shared-volume:/home/${D_USER:?error}
     ports:
       - '${D_GENERIC_SSH_PORT:?error}:22'
@@ -116,6 +121,8 @@ services:
         - HTTPS_PROXY=${D_HTTPS_PROXY:?error}
     volumes:
         - ${D_HOME:?error}:${D_HOME:?error}/host
+        - /lib/modules:/lib/modules
+        - /boot:/boot
           #- shared-volume:/home/${D_USER:?error}
     ports:
       - '${D_YOCTO_SSH_PORT:?error}:22'
@@ -131,6 +138,47 @@ services:
     #stdin_open: true # docker run -i
     #tty: true        # docker run -t
 
+  tdx:
+    image: ${D_USER:?error}-tdx:ubuntu
+    container_name: ${D_USER:?error}-tdx
+    build:
+      context: ./dockerfile-tdx-ubuntu-24.04
+      dockerfile: Dockerfile-tdx
+        #entitlements:
+        #- security.insecure
+      no_cache: true
+      args:
+        - username=${D_USER:?error}
+        - gid=${D_GID:?error}
+        - uid=${D_UID:?error}
+        - password=${D_PASSWORD:?error}
+        - gt=${GIT_AUTH_TOKEN:?error}
+        - HTTP_PROXY=${D_HTTP_PROXY:?error}
+        - HTTPS_PROXY=${D_HTTPS_PROXY:?error}
+    volumes:
+        - ${D_HOME:?error}:${D_HOME:?error}/host
+        - /lib/modules:/lib/modules
+        - /boot:/boot
+        - /dev:/dev
+          #- shared-volume:/home/${D_USER:?error}
+    ports:
+      - '${D_TDX_SSH_PORT:?error}:22'
+      - '${D_TDX_VNC_PORT:?error}:5900'
+      - '${D_TDX_NOVNC_PORT:?error}:6080'
+    privileged: true
+      #environment:
+      #- HTTP_PROXY=${D_HTTP_PROXY:?error}
+      #- HTTPS_PROXY=${D_HTTPS_PROXY:?error}
+    hostname: tdx
+    #cap_add:
+    #  - ALL # Needed for VFIO & device access
+    #devices:
+    #  - "/dev/vfio/33:/dev/vfio/33" # Map your VFIO device into container
+    #  - "/dev/vfio/vfio:/dev/vfio/vfio" # VFIO control device
+    networks:
+      - network-b2b-yocto-ci-at-all
+    #stdin_open: true # docker run -i
+    #tty: true        # docker run -t
 #volumes:
 #    shared-volume:
 

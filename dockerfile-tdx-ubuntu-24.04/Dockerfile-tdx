@@ -1,0 +1,96 @@
+FROM ubuntu:24.04
+
+ARG username
+ARG gid
+ARG uid
+ARG password
+ARG gt
+
+# default screen size
+ENV XRES=1280x800x24
+
+# Ubuntu doesn't set this var and without it avery qemu fails
+ENV USER=${username}
+
+# supress dialogue when installing tzdata
+ENV TZ=Europe/Warsaw
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN <<EOF
+# To pass ${username} to Dockerfile go 'docker build --build-arg username=<user>'
+groupadd --gid ${gid} ${username}
+useradd --uid ${uid} --gid ${gid} --shell /bin/bash --create-home ${username}
+usermod -a -G sudo ${username}
+usermod -a -G kvm ${username}
+echo "${username}:${password}" | chpasswd
+EOF
+
+# This apt-conf includes the http proxy used in Intel. Run it only for Intel.
+COPY apt.conf /etc/apt/
+
+RUN mkdir -p /var/run/sshd && chmod 755 /var/run/sshd
+
+RUN <<EOF
+# esentially Yocto tools
+apt-get -y update && apt-get -y install build-essential chrpath cpio debianutils diffstat file gawk \
+  gcc iputils-ping libacl1 liblz4-tool python3 python3-git locales \
+  python3-jinja2 python3-pexpect python3-pip python3-subunit socat texinfo unzip \
+  wget xz-utils zstd iproute2
+apt-get -y install sudo vim tmux gzip unzip git cpu-checker  perl libterm-readkey-perl \
+  libpixman-1-0 libpixman-1-dev  libglib2.0-0 \
+# required from sv
+  dc time libelf1
+# install kmod (modprobe) gh, slirp, libslirp, etc.
+apt-get -y kmod gh libslirp-dev sphinx-basic-ng python3-sphinx-rtd-theme \
+  ninja-build pkg-config libglib2.0-dev
+# install GUI, vnc, novnc
+apt-get install -y --no-install-recommends apt-utils sudo supervisor vim \
+  openssh-server \
+  xserver-xorg xvfb x11vnc dbus-x11 xfce4 \
+  xfce4-terminal xfce4-xkb-plugin \
+  novnc websockify
+EOF
+
+# Yocto needs 'en_US.UTF-8' locale genearted.
+RUN sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && locale-gen
+
+# Put MOTD in .bash_aliases
+COPY .bash_aliases /home/${username}
+
+# make /bin/sh symlink to bash instead of running dash:
+RUN echo "dash dash/sh boolean false" | debconf-set-selections
+RUN DEBIAN_FRONTEND=noninteractive dpkg-reconfigure dash
+
+# add my sys config files
+COPY etc /etc
+
+# Install firefox
+RUN apt-get -y update && apt-get -y install firefox
+
+# user config files
+# terminal
+COPY config/xfce4/terminal/terminalrc /home/${username}/.config/xfce4/terminal/terminalrc
+# wallpaper
+COPY config/xfce4/xfconf/xfce-perchannel-xml/xfce4-desktop.xml /home/${username}/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-desktop.xml
+# icon theme
+COPY config/xfce4/xfconf/xfce-perchannel-xml/xsettings.xml /home/${username}/.config/xfce4/xfconf/xfce-perchannel-xml/xsettings.xml
+
+# Clone meta-cxl and poky
+# It is a mix of 'ADD' and 'RUN'. 'ADD' downloads a release without a git protocol.
+# 'RUN' with git clone does what git clone do. For the repositories not amendable 'ADD' is
+# fine, for ones that we want to contribute git clone is sought.
+RUN mkdir -p /home/${username}/yocto/
+#ADD https://${gt}@github.com/MarekBykowski/poky.git#nanbield /home/${username}/yocto/poky
+RUN git clone --branch nanbield https://${gt}@github.com/MarekBykowski/poky.git /home/${username}/yocto/poky
+#ADD https://${gt}@github.com/MarekBykowski/meta-cxl.git#nanbield /home/${username}/yocto/meta-cxl
+RUN git clone --branch nanbield https://${gt}@github.com/MarekBykowski/meta-cxl.git /home/${username}/yocto/meta-cxl
+ADD https://git.openembedded.org/meta-openembedded.git#nanbield /home/${username}/yocto/meta-openembedded
+
+RUN chown -v -R ${username}:${username} /home/${username}
+
+# ports
+EXPOSE 22 5900 6080
+
+# default command
+CMD ["/usr/bin/supervisord","-c","/etc/supervisord.conf"]
