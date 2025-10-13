@@ -25,6 +25,7 @@ services:
       - '${D_B2B_NOVNC_PORT:?error}:6080'
     privileged: true
     hostname: b2b
+    profiles: ["b2b"] # Same name as the service
     networks:
       - network-b2b-yocto-ci-at-all
     #stdin_open: true # docker run -i
@@ -61,6 +62,7 @@ services:
       #- HTTP_PROXY=${D_HTTP_PROXY:?error}
       #- HTTPS_PROXY=${D_HTTPS_PROXY:?error}
     hostname: yocto-ci
+    profiles: ["yocto-ci"] # Same name as the service
     networks:
       - network-b2b-yocto-ci-at-all
     #stdin_open: true # docker run -i
@@ -97,6 +99,7 @@ services:
       #- HTTP_PROXY=${D_HTTP_PROXY:?error}
       #- HTTPS_PROXY=${D_HTTPS_PROXY:?error}
     hostname: generic
+    profiles: ["generic"] # Same name as the service
     networks:
       - network-b2b-yocto-ci-at-all
     #stdin_open: true # docker run -i
@@ -133,6 +136,7 @@ services:
       #- HTTP_PROXY=${D_HTTP_PROXY:?error}
       #- HTTPS_PROXY=${D_HTTPS_PROXY:?error}
     hostname: yocto
+    profiles: ["yocto"] # Same name as the service
     networks:
       - network-b2b-yocto-ci-at-all
     #stdin_open: true # docker run -i
@@ -170,6 +174,7 @@ services:
       #- HTTP_PROXY=${D_HTTP_PROXY:?error}
       #- HTTPS_PROXY=${D_HTTPS_PROXY:?error}
     hostname: tdx
+    profiles: ["tdx"] # Same name as the service
     #cap_add:
     #  - ALL # Needed for VFIO & device access
     #devices:

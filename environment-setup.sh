@@ -30,7 +30,7 @@ for i in "${!keys[@]}"; do
 	START_PORT_PER_USER[${keys[$i]}]=${vals[$i]}
 done
 
-# Test if a user running the script is on the list 
+# Test if a user running the script is on the list
 for item in ${keys[@]}; do
 	if [[  $USER == $item ]]; then
 		found=1
@@ -58,7 +58,8 @@ test -f $env_config_path && {
 	echo -e "\t'rm -f $env_config_path && source $env_setup_path'"
 	return 127
 }
-# Common values shared by two containers
+
+# Common values shared by all the containers
 echo "export D_UID=$(id -u)" >> $env_config_path
 echo "export D_GID=$(id -g)" >> $env_config_path
 echo "export D_PASSWORD=password" >> $env_config_path
@@ -68,15 +69,66 @@ echo "export D_HTTPS_PROXY=http://proxy-us.intel.com:912" >> $env_config_path
 echo "export D_HTTP_PROXY=http://proxy-us.intel.com:911" >> $env_config_path
 echo "export D_HOME=$HOME" >> $env_config_path
 COMPOSE_PROJECT_NAME=$D_USER
-echo "echo \"Your Docker eco-system is named: $COMPOSE_PROJECT_NAME\"" >> $env_config_path
-echo "#COMPOSE_PROJECT_NAME is a compose defined var exported. Do not change its name!" >> $env_config_path
+echo -e "\necho \"Your Docker eco-system is named: $COMPOSE_PROJECT_NAME\"" >> $env_config_path
 echo "export COMPOSE_PROJECT_NAME=$COMPOSE_PROJECT_NAME" >> $env_config_path
+
+# All the services use a service profiles. Read more here https://docs.docker.com/compose/how-tos/profiles/
+# Compose file
+CF=compose_b2b_yocto-ci_at_all.yml
+# All the services defined
+# I cannot run the compose config to find out a number of services defined
+# as first I need to have the variables exported which I can only export followed
+# knowing the services a user wants to run , so it is "the chicken-and-egg dilemma".
+# What I got left is to list the services manually.
+#all_services=($(docker compose --profile "*" -f $CF config --services))
+all_services=(b2b yocto-ci generic yocto tdx)
+echo "Available services:"
+for i in "${!all_services[@]}"; do
+	echo "$((i+1))) ${all_services[i]}"
+done
+
+while true; do
+	read -p "Choose one or more (numbers, space-separated): " -a choices
+	valid=true
+
+	selected_services=()
+
+	for c in "${choices[@]}"; do
+		# Check if input is a number
+		if ! [[ "$c" =~ ^[0-9]+$ ]]; then
+			echo "'$c' is not a valid number."
+			valid=false
+			break
+		fi
+
+		# Check if within range
+		if (( c < 1 || c > ${#all_services[@]} )); then
+			echo "'$c' is out of range (1-${#all_services[@]})."
+			valid=false
+			break
+		fi
+		selected_services+=("${all_services[c-1]}")
+	done
+
+	if $valid; then
+		break
+	else
+		echo "Please try again."
+	fi
+done
+
+COMPOSE_PROFILES=$(IFS=','; echo "${selected_services[*]}")
+echo "You selected: ${selected_services[@]}"
+
+echo -e "\necho \"Your Docker eco-system will run the following services (containers): ${selected_services[@]}\"" >> $env_config_path
+echo "export COMPOSE_PROFILES=$COMPOSE_PROFILES" >> $env_config_path
 
 # Ports must be unique system-wise and ideally remain unchanged to the end of life of containeres.
 # The algorithm for assigning the ports is in a 'port-assignment.sh' file.
 # I need ports for:
-echo "Doing ports for: b2b, yocto-ci, generic, yocto, tdx"
-NUMBER_OF_PORTS=15
+echo "Doing ports for: ${selected_services[*]}"
+# 3x ports per service
+NUMBER_OF_PORTS=$((${#selected_services[@]}*3))
 echo "... so total number of ports looked for is: $NUMBER_OF_PORTS"
 
 # Range of ports to check
@@ -103,6 +155,40 @@ done
 
 echo "Ports allocated: ${ports[@]}"
 
+#for i in "${selected_services[@]}"; do
+#	service=${selected_services[$i]}
+#	SERVICE=${service^^}
+#	echo "export D_${SERVICE}_SSH_PORT=${ports[]}" >> $env_config_path
+#done
+
+for ((i=0,j=0; i<${#selected_services[@]}; i++)); do
+	service=${selected_services[$i]}
+	# Convert to UPPERCASE
+	SERVICE=${service^^}
+	# Convert all dashes (-) to underscores (_)
+	SERVICE=${SERVICE//-/_}
+
+	# i is a service
+	# j is a protocol incrementing the service by:
+	# - 0,1,2 at 1st iteration
+	# - then 2,3,4 at 2nd iteration, etc.
+	k=$((i+j))
+	echo "D_${SERVICE}_SSH_PORT is ${ports[$k]}"
+	echo -e "\necho \"${SERVICE} ssh port: ${ports[$k]}\"" >> $env_config_path
+	echo "export D_${SERVICE}_SSH_PORT=${ports[$k]}" >> $env_config_path
+
+	((j++)); k=$((i+j))
+	echo "D_${SERVICE}_VNC_PORT is ${ports[$k]}"
+	echo -e "\necho \"${SERVICE} vnc port: ${ports[$k]}\"" >> $env_config_path
+	echo "export D_${SERVICE}_VNC_PORT=${ports[$k]}" >> $env_config_path
+
+	((j++)); k=$((i+j))
+	echo "D_${SERVICE}_NOVNC_PORT is ${ports[$k]}"
+	echo -e "\necho \"${SERVICE} novnc port: ${ports[$k]}\"" >> $env_config_path
+	echo "export D_${SERVICE}_NOVNC_PORT=${ports[$k]}" >> $env_config_path
+done
+
+:<<COMMENT
 # Ports for the 'b2b' container
 D_B2B_SSH_PORT=${ports[0]}
 D_B2B_VNC_PORT=${ports[1]}
@@ -167,6 +253,7 @@ echo "SSH port for tdx container is: $D_TDX_SSH_PORT"
 echo "VNC port for tdx container is: $D_TDX_VNC_PORT"
 echo "NOVNC port for tdx container is: $D_TDX_NOVNC_PORT"
 EOF
+COMMENT
 
 cat << EOF >> $env_config_path
 export GIT_AUTH_TOKEN="g\

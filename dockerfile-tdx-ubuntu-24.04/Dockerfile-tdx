@@ -93,7 +93,7 @@ RUN git clone --branch master https://${gt}@github.com/MarekBykowski/virtualizat
 WORKDIR /home/${username}/repos/qemu
 RUN ./configure --enable-slirp --target-list=x86_64-softmmu --prefix=/usr/local/qemu --disable-werror && \
   make -j$(nproc) && make install
-RUN git clone --branch master https://${gt}@github.com/MarekBykowski/qemu-tpa-td.git /home/${username}/repos/qemu-tpa-td
+RUN git clone --branch container https://${gt}@github.com/MarekBykowski/qemu-tpa-td.git /home/${username}/repos/qemu-tpa-td
 
 RUN chown -v -R ${username}:${username} /home/${username}
 
