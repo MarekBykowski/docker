@@ -44,6 +44,8 @@ apt-get -y install sudo vim tmux gzip unzip git cpu-checker  perl libterm-readke
 # install kmod (modprobe) gh, slirp, libslirp, etc.
 apt-get install -y kmod gh libslirp-dev sphinx-basic-ng python3-sphinx-rtd-theme \
   ninja-build pkg-config libglib2.0-dev
+# install remaining build dependencies for pciutils 3.13+ installed from repo (note ubuntu has 3.10)
+apt-get install -y libpci-dev
 # install GUI, vnc, novnc
 apt-get install -y --no-install-recommends apt-utils sudo supervisor vim \
   openssh-server \
@@ -64,6 +66,15 @@ RUN DEBIAN_FRONTEND=noninteractive dpkg-reconfigure dash
 
 # add my sys config files
 COPY etc /etc
+
+# Build and install pciutils 3.13+
+RUN git clone https://github.com/pciutils/pciutils.git /tmp/pciutils \
+    && cd /tmp/pciutils \
+    && git checkout v3.14.0 \
+    && make -j$(nproc) \
+    && make install \
+    && cd / \
+    && rm -rf /tmp/pciutils
 
 # Install firefox
 RUN apt-get -y update && apt-get -y install firefox
