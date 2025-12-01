@@ -25,8 +25,8 @@ fi
 # List users permitted to use the docker eco-system
 #keys=("rvranax" "csmx" "svellipx" "tziyangx" "tonyhunx" "markhox" "test2" "mbykowsx")
 #vals=(11100 11200 11300 11400 11500 11600 11700 11800)
-keys=("mbykowsx" "test1" "tonyhunx" "markhox" )
-vals=(12800 13800 14800 15800)
+keys=("mbykowsx" "test1" "tonyhunx" "markhox" "rvranax")
+vals=(12800 13800 14800 15800 16800)
 declare -A START_PORT_PER_USER
 for i in "${!keys[@]}"; do
 	START_PORT_PER_USER[${keys[$i]}]=${vals[$i]}
@@ -83,7 +83,7 @@ CF=compose_b2b_yocto-ci_at_all.yml
 # knowing the services a user wants to run , so it is "the chicken-and-egg dilemma".
 # What I got left is to list the services manually.
 #all_services=($(docker compose --profile "*" -f $CF config --services))
-all_services=(b2b yocto-ci generic yocto tdx)
+all_services=(b2b b2b-2025-3 yocto-ci generic yocto tdx)
 echo "Available services:"
 for i in "${!all_services[@]}"; do
 	echo "$((i+1))) ${all_services[i]}"
@@ -136,7 +136,7 @@ echo "... so total number of ports looked for is: $NUMBER_OF_PORTS"
 # Range of ports to check
 START_PORT=${START_PORT_PER_USER[$USER]}
 # It will search a NUMBER_OF_PORTS in the range from START_PORT thr END_PORT
-END_PORT=$((START_PORT+30))
+END_PORT=$((START_PORT+40))
 source $env_dir/port-assignment.sh
 ports=()
 count=0

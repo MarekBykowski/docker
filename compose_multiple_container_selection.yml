@@ -31,6 +31,38 @@ services:
     #stdin_open: true # docker run -i
     #tty: true        # docker run -t
 
+  b2b-2025-3:
+    image: ${D_USER:?error}-b2b-2025-3:ubuntu
+    container_name: ${D_USER:?error}-b2b-2025-3
+    build:
+      context: ./dockerfile-b2b-2025-3
+      dockerfile: Dockerfile-b2b-2025-3
+      #entitlements:
+      #- security.insecure
+      #no_cache: true
+      args:
+        - username=${D_USER:?error}
+        - gid=${D_GID:?error}
+        - uid=${D_UID:?error}
+        - password=${D_PASSWORD:?error}
+          #- HTTP_PROXY=${D_HTTP_PROXY:?error}
+          #- HTTPS_PROXY=${D_HTTPS_PROXY:?error}
+    volumes:
+        - ${D_HOME:?error}:${D_HOME:?error}/host
+        - /lib/modules:/lib/modules
+        - /boot:/boot
+    ports:
+      - '${D_B2B_2025_3_SSH_PORT:?ERROR}:22'
+      - '${D_B2B_2025_3_VNC_PORT:?error}:5900'
+      - '${D_B2B_2025_3_NOVNC_PORT:?error}:6080'
+    privileged: true
+    hostname: b2b-2025-3
+    profiles: ["b2b-2025-3"] # Same name as the service
+    networks:
+      - network-b2b-yocto-ci-at-all
+    #stdin_open: true # docker run -i
+    #tty: true        # docker run -t
+
   yocto-ci:
     image: ${D_USER:?error}-yocto-ci:ubuntu
     container_name: ${D_USER:?error}-yocto-ci
