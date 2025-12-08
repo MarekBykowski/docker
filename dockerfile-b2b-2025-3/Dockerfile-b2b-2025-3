@@ -40,6 +40,9 @@ apt-get update -y && apt-get install -y build-essential chrpath cpio debianutils
 apt-get -y install sudo vim tmux gzip unzip git cpu-checker perl libterm-readkey-perl \
  libpixman-1-0 libpixman-1-dev libglib2.0-0
 
+# specifically b2b 2025 version requires this
+apt-get -y install iproute2 libncursesw5 patch
+
 # required from sv
 apt-get install -y dc time libelf1
 
@@ -67,11 +70,14 @@ RUN DEBIAN_FRONTEND=noninteractive dpkg-reconfigure dash
 
 # Install b2b tools
 RUN mkdir -p /home/${username}/avery/2025-3
-COPY apciexactor-2.5c.cxl.tar.gz cxlvs-2025.3.tgz \
-  vics-2025.2.1.tgz vip-2025.3.tgz avery_qemu-avery-2025.3.zip \
-  verdi.tar.gz vcsmx.tar.gz /tmp
+COPY cxlvs-2025.3.tgz vics-2025.2.1.tgz vip-2025.3.tgz \
+  avery_qemu_env.zip verdi.tar.gz vcsmx.tar.gz /tmp
 RUN for f in /tmp/*.tar.gz /tmp/*.tgz; do tar -xzf $f -C /home/${username}/avery/2025-3 && rm $f; done
-RUN unzip /tmp/avery_qemu-avery-2025.3.zip -d /home/${username}/avery/2025-3
+RUN unzip /tmp/avery_qemu_env.zip -d /home/${username}/avery/2025-3
+# Copy and apply a patch for Avery's qemu
+COPY 0001-Fix-an-if-clouse-in-run_qemu.pl-perl-script.patch /home/${username}/avery/2025-3
+RUN set -eux; cd /home/${username}/avery/2025-3; \
+   patch -p1 < 0001-Fix-an-if-clouse-in-run_qemu.pl-perl-script.patch
 
 # add my sys config files
 COPY etc /etc

@@ -1,0 +1,26 @@
+From 309bbca7dbffa59a1f582efc58b39a4b27bdd831 Mon Sep 17 00:00:00 2001
+From: Marek Bykowski <marek.bykowski@gmail.com>
+Date: Wed, 3 Dec 2025 16:26:33 +0100
+Subject: [PATCH] Fix an `if` clouse in run_qemu.pl perl script
+
+Signed-off-by: Marek Bykowski <marek.bykowski@gmail.com>
+---
+ vics/scripts/run_qemu.pl | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/vics/scripts/run_qemu.pl b/vics/scripts/run_qemu.pl
+index 25fb291..20aaf23 100755
+--- a/vics/scripts/run_qemu.pl
++++ b/vics/scripts/run_qemu.pl
+@@ -1546,7 +1546,7 @@ sub save_dir {
+ sub check_port {
+     my ($port_name, $port)= @_;
+ 
+-    if (`command -v ss` eq '') {
++    if (system("command -v ss >/dev/null 2>&1") != 0) {
+         die("ss is not supported. Please manually modify script to automatically assign the $port_name \n");
+     }
+     
+-- 
+2.25.1
+

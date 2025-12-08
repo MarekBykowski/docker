@@ -3,7 +3,7 @@ Welcome to the Docker b2b container!
 
 Within this container you can run `Avery B2B` on the same machine.
 Source `enviroment_setup.sh` and folow the howto.
-`source ~/avery/2025-3/avery_qemu-avery-2025.3/enviroment_setup.sh
+`source ~/home/mbykowsx/avery/2025-3/enviroment_setup.sh`
 EOF
 
 if [[ : ]]; then
