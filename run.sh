@@ -9,7 +9,10 @@ selected_services=($(docker compose -f $CF config --services))
 echo Inspection for all of your services: ${selected_services[@]}
 if [[ $1 == up ]]; then
 	test -f docker-compose.log && rm -f docker-compose.log
-	docker compose --progress=plain -f ${CF} up | tee -a docker-compose.log
+	# We are better off running with --no-cache to ensure a clean build
+	docker compose -f ${CF} build --no-cache --progress=plain | tee -a docker-compose.log
+	docker compose -f ${CF} up | tee -a docker-compose.log
+	#docker compose --progress=plain -f ${CF} up | tee -a docker-compose.log
 	#docker compose --progress=plain -f ${CF} up --build | tee -a docker-compose.log
 	#COMPOSE_PROFILE=${ARGS[@]} docker compose --progress=plain -f ${CF} up --build | tee -a docker-compose.log
 	#docker compose -f ${CF} up -d
