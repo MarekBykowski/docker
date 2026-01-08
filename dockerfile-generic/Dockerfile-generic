@@ -87,17 +87,6 @@ COPY config/xfce4/xfconf/xfce-perchannel-xml/xfce4-desktop.xml /home/${username}
 # icon theme
 COPY config/xfce4/xfconf/xfce-perchannel-xml/xsettings.xml /home/${username}/.config/xfce4/xfconf/xfce-perchannel-xml/xsettings.xml
 
-# Clone meta-cxl and poky
-# It is a mix of 'ADD' and 'RUN'. 'ADD' downloads a release without a git protocol.
-# 'RUN' with git clone does what git clone do. For the repositories not amendable 'ADD' is
-# fine, for ones that we want to contribute git clone is sought.
-RUN mkdir -p /home/${username}/yocto/
-#ADD https://${gt}@github.com/MarekBykowski/poky.git#nanbield /home/${username}/yocto/poky
-RUN git clone --branch nanbield https://${gt}@github.com/MarekBykowski/poky.git /home/${username}/yocto/poky
-#ADD https://${gt}@github.com/MarekBykowski/meta-cxl.git#nanbield /home/${username}/yocto/meta-cxl
-RUN git clone --branch nanbield https://${gt}@github.com/MarekBykowski/meta-cxl.git /home/${username}/yocto/meta-cxl
-ADD https://git.openembedded.org/meta-openembedded.git#nanbield /home/${username}/yocto/meta-openembedded
-
 RUN chown -v -R ${username}:${username} /home/${username}
 
 # ports
