@@ -25,8 +25,8 @@ fi
 # List users permitted to use the docker eco-system
 #keys=("rvranax" "csmx" "svellipx" "tziyangx" "tonyhunx" "markhox" "test2" "mbykowsx")
 #vals=(11100 11200 11300 11400 11500 11600 11700 11800)
-keys=("mbykowsx" "test1" "tonyhunx" "markhox" "rvranax" "suhaspax" "tziyangx")
-vals=(12800 13800 14800 15800 16800 17800 18800)
+keys=("mbykowsx" "test1" "tonyhunx" "markhox" "rvranax" "suhaspax" "tziyangx" "csmx")
+vals=(12800 13800 14800 15800 16800 17800 18800 19800)
 declare -A START_PORT_PER_USER
 for i in "${!keys[@]}"; do
 	START_PORT_PER_USER[${keys[$i]}]=${vals[$i]}

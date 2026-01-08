@@ -11,7 +11,7 @@ if [[ $1 == up ]]; then
 	test -f docker-compose.log && rm -f docker-compose.log
 	# No cache does the pristine build even though the images are already build.
 	# Uncomment it only when needed
-	# docker compose -f ${CF} build --no-cache --progress=plain | tee -a docker-compose.log
+	docker compose -f ${CF} build --no-cache --progress=plain | tee -a docker-compose.log
 	docker compose -f ${CF} up | tee -a docker-compose.log
 	#docker compose --progress=plain -f ${CF} up | tee -a docker-compose.log
 	#docker compose --progress=plain -f ${CF} up --build | tee -a docker-compose.log
