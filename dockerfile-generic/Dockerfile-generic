@@ -29,8 +29,6 @@ EOF
 # This apt-conf includes the http proxy used in Intel. Run it only for Intel.
 COPY apt.conf /etc/apt/
 
-RUN mkdir -p /var/run/sshd && chmod 755 /var/run/sshd
-
 RUN <<EOF
 # esentially Yocto tools
 apt-get -y update && apt-get -y install build-essential chrpath cpio debianutils diffstat file gawk \
@@ -48,6 +46,14 @@ apt-get install -y --no-install-recommends apt-utils sudo supervisor vim \
   xfce4-terminal xfce4-xkb-plugin \
   novnc websockify
 EOF
+
+# sshd fix
+RUN mkdir -p /run/sshd && chmod 0755 /run/sshd && \
+   rm -f /etc/ssh/ssh_host_* && \
+   ssh-keygen -A && \
+   chmod 600 /etc/ssh/ssh_host_*_key && \
+   chmod 644 /etc/ssh/ssh_host_*_key.pub && \
+   /usr/sbin/sshd -t
 
 # Some bits of yocto-ci require this
 RUN python3 -m pip install --upgrade pip --proxy http://proxy-us.intel.com:912 && \
