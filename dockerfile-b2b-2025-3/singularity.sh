@@ -29,7 +29,7 @@ build_args=(
 )
 
 # Toggle flags safely
-#build_args+=(--no-cache)
+build_args+=(--no-cache)
 
 if [[ $1 == b ]]; then
 	docker build "${build_args[@]}"
