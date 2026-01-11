@@ -4,6 +4,7 @@ ARG username
 ARG gid
 ARG uid
 ARG password
+ARG gt
 
 # default screen size
 ENV XRES=1280x800x24
@@ -59,9 +60,6 @@ RUN mkdir -p /run/sshd && chmod 0755 /run/sshd && \
 # Put MOTD in .bash_aliases
 COPY .bash_aliases /home/${username}
 
-# Copy sample qcow to have what to get started with
-COPY core-image-cxl-sdk-cxlx86-64.rootfs.wic.qcow2 /home/${username}
-
 # install gh. in Ubuntu 20.04 it is not in apt
 COPY gh_2.69.0_linux_amd64.deb /home/${username}
 RUN dpkg -i /home/${username}/gh_2.69.0_linux_amd64.deb
@@ -71,12 +69,18 @@ RUN echo "dash dash/sh boolean false" | debconf-set-selections
 RUN DEBIAN_FRONTEND=noninteractive dpkg-reconfigure dash
 
 # Install b2b tools
-RUN mkdir -p /home/${username}/avery/2025-3
-COPY apciexactor-2.5c.cxl.tar.gz cxlvs-2025.3.tgz \
-  vics-2025.2.1.tgz vip-2025.3.tgz avery_qemu-avery-2025.3.zip \
-  verdi.tar.gz vcsmx.tar.gz /tmp
-RUN for f in /tmp/*.tar.gz /tmp/*.tgz; do tar -xzf $f -C /home/${username}/avery/2025-3 && rm $f; done
-RUN unzip /tmp/avery_qemu-avery-2025.3.zip -d /home/${username}/avery/2025-3
+RUN mkdir -p /opt/avery/2025-3
+#COPY apciexactor-2.5c.cxl.tar.gz cxlvs-2025.3.tgz \
+#  vics-2025.2.1.tgz avery_qemu-avery-2025.3.zip \
+#  verdi.tar.gz vcsmx.tar.gz /tmp
+#RUN for f in /tmp/*.tar.gz /tmp/*.tgz; do tar -xzf $f -C /opt/avery/2025-3 && rm $f; done
+
+RUN git clone --branch avery-2025.3 https://${gt}@github.com/MarekBykowski/avery_qemu.git \
+  /opt/avery/2025-3/avery_qemu_env
+
+# Set ownership of Avery tools to the $USER as otherwise sudo is required to
+# make any changes to the Avery files
+RUN chown -v -R ${username}:${username} /opt
 
 # add my sys config files
 COPY etc /etc
