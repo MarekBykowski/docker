@@ -1,0 +1,26 @@
+From db169fae5b49feeca646c37e334d938622dde30c Mon Sep 17 00:00:00 2001
+From: Marek Bykowski <marek.bykowski@gmail.com>
+Date: Mon, 12 Jan 2026 03:16:16 +0100
+Subject: [PATCH] Bugfix for run_qemu.pl
+
+Signed-off-by: Marek Bykowski <marek.bykowski@gmail.com>
+---
+ vics/scripts/run_qemu.pl | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/vics/scripts/run_qemu.pl b/vics/scripts/run_qemu.pl
+index 25fb291..582d6c1 100755
+--- a/vics/scripts/run_qemu.pl
++++ b/vics/scripts/run_qemu.pl
+@@ -1546,7 +1546,7 @@ sub save_dir {
+ sub check_port {
+     my ($port_name, $port)= @_;
+ 
+-    if (`command -v ss` eq '') {
++    if ( (my $out = `command -v ss 2>/dev/null`) eq '' ) {
+         die("ss is not supported. Please manually modify script to automatically assign the $port_name \n");
+     }
+     
+-- 
+2.25.1
+

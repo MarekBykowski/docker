@@ -36,17 +36,20 @@ apt-get update -y && apt-get install -y build-essential chrpath cpio debianutils
   python3-jinja2 python3-pexpect python3-pip python3-subunit socat texinfo unzip \
   wget xz-utils zstd
 apt-get -y install sudo vim tmux gzip unzip git cpu-checker perl libterm-readkey-perl \
- libpixman-1-0 libpixman-1-dev libglib2.0-0
+  libpixman-1-0 libpixman-1-dev libglib2.0-0
+
+# updated b2b 2025-3 requires on top
+apt-get -y install libncurses5 libncursesw5 iproute2
 
 # required from sv
 apt-get install -y dc time libelf1
 
 # install GUI, vnc, novnc
 apt-get install -y --no-install-recommends apt-utils sudo supervisor vim \
-   openssh-server \
-   xserver-xorg xvfb x11vnc dbus-x11 xfce4 \
-   xfce4-terminal xfce4-xkb-plugin \
-   novnc websockify
+  openssh-server \
+  xserver-xorg xvfb x11vnc dbus-x11 xfce4 \
+  xfce4-terminal xfce4-xkb-plugin \
+  novnc websockify
 EOF
 
 # sshd fix
@@ -74,8 +77,25 @@ COPY cxlvs-2025.3.tgz vics-2025.2.1.tgz \
   vip-2025.3.tgz verdi.tar.gz vcsmx.tar.gz /tmp
 RUN for f in /tmp/*.tar.gz /tmp/*.tgz; do tar -xzf $f -C /opt/avery/2025-3 && rm $f; done
 
+# copy the patch into the image
+COPY 0001-Bugfix-for-run_qemu.pl.patch /tmp/
+
+# apply the patch
+RUN set -eux; \
+    cd /opt/avery/2025-3/vics-2025.2.1; \
+    patch -p1 < /tmp/0001-Bugfix-for-run_qemu.pl.patch; \
+    rm -f /tmp/0001-Bugfix-for-run_qemu.pl.patch
+
 RUN git clone --branch avery-2025.3 https://${gt}@github.com/MarekBykowski/avery_qemu.git \
   /opt/avery/2025-3/avery_qemu_env
+
+# Fix qemu release by shipping pc-bios missing together with the binary
+RUN set -eux; \
+    git clone --depth 1 https://github.com/qemu/qemu.git /tmp/qemu; \
+    mkdir -p /opt/avery/2025-3/vics-2025.2.1/vics/tools/qemu-bundle/usr/local/share/qemu; \
+    cp -r /tmp/qemu/pc-bios/* \
+       /opt/avery/2025-3/vics-2025.2.1/vics/tools/qemu-bundle/usr/local/share/qemu/; \
+    rm -rf /tmp/qemu
 
 # Set ownership of Avery tools to the $USER as otherwise sudo is required to
 # make any changes to the Avery files

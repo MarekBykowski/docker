@@ -45,6 +45,7 @@ elif [[ $1 == tr ]]; then
 	  -p 55900:5900 \
 	  -p 56080:6080 \
 	  -v /home/mbykowsx:/home/mbykowsx/host \
+	  -v $PWD:/home/mbykowsx/workdir \
 	  -v /lib/modules:/lib/modules \
 	  -v /boot:/boot \
 	  $docker_image
