@@ -53,10 +53,15 @@ env_config_name=environment-config
 env_config_path=$env_dir/$env_config_name
 
 test -f $env_config_path && {
-	echo "You have already created a config file \"$env_config_path\" for the docker eco-system."
-	echo "Each time you wish to use it run:"
-	echo -e "\t'source $env_config_path'"
-	echo "If you want to create an updated config file remove this one and re-resource the script, eg."
+	echo "A configuration file \"$env_config_path\" for the Docker ecosystem has already been provisioned."
+	echo "Each time you want to use it, run:"
+	echo -e "\t'source $env_config_path'\n"
+	echo "However, if you want to re-provision the ecosystem you may want to follow these steps:"
+	echo -e "1. Remove the existing container/s (if any)"
+	echo -e "\t'source /home/mbykowsx/docker-intel/environment-config && ./run.sh down'"
+	echo -e "2. Remove the existing image/s (if any)"
+	echo -e "\t'source /home/mbykowsx/docker-intel/environment-config && ./run.sh rmi'"
+	echo -e "3. Re-create the setup script:"
 	echo -e "\t'rm -f $env_config_path && source $env_setup_path'"
 	return 127
 }
@@ -77,11 +82,8 @@ echo "export COMPOSE_PROJECT_NAME=$COMPOSE_PROJECT_NAME" >> $env_config_path
 # All the services use a service profiles. Read more here https://docs.docker.com/compose/how-tos/profiles/
 # Compose file
 CF=compose_b2b_yocto-ci_at_all.yml
-# All the services defined
-# I cannot run the compose config to find out a number of services defined
-# as first I need to have the variables exported which I can only export followed
-# knowing the services a user wants to run , so it is "the chicken-and-egg dilemma".
-# What I got left is to list the services manually.
+
+# Find all the services defined
 #all_services=($(docker compose --profile "*" -f $CF config --services))
 all_services=(b2b b2b-2025-3 yocto-ci generic yocto tdx)
 echo "Available services:"

@@ -8,10 +8,12 @@ CF=compose_multiple_container_selection.yml
 selected_services=($(docker compose -f $CF config --services))
 echo Inspection for all of your services: ${selected_services[@]}
 if [[ $1 == up ]]; then
+	mkdir -p workdir
+	# Create bind mount workdir directory
 	test -f docker-compose.log && rm -f docker-compose.log
 	# No cache does the pristine build even though the images are already build.
-	# Uncomment it only when needed
-	docker compose -f ${CF} build --no-cache --progress=plain | tee -a docker-compose.log
+	# Uncomment the line with "--no-cache" only when needed
+	#docker compose -f ${CF} build --no-cache --progress=plain | tee -a docker-compose.log
 	docker compose -f ${CF} up | tee -a docker-compose.log
 	#docker compose --progress=plain -f ${CF} up | tee -a docker-compose.log
 	#docker compose --progress=plain -f ${CF} up --build | tee -a docker-compose.log
@@ -19,8 +21,16 @@ if [[ $1 == up ]]; then
 	#docker compose -f ${CF} up -d
 elif [[ $1 == down ]]; then
 	docker compose -f ${CF} down --volumes
+	rm -rf workdir
+elif [[ $1 == rmi ]]; then
+	for t in `docker compose -f ${CF} config | grep image: | awk '{print $2}'`; do
+		echo "docker rmi $t"
+		docker rmi $t
+	done
 elif [[ $1 == ps ]]; then
 	docker compose -f ${CF} ps
+	echo
+	docker compose -f ${CF} images
 elif [[ $1 == config ]]; then
 	docker compose -f ${CF} config
 elif [[ $1 == commit ]]; then
@@ -45,7 +55,7 @@ elif [[ $1 == push ]]; then
 	done
 else
 	cat <<-EOF
-	$0 <up|down|ps|config|commit|push>
+	$0 <up|down|rmi|ps|config|commit|push>
 	EOF
 fi
 

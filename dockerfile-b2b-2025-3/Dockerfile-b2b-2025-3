@@ -54,11 +54,11 @@ EOF
 
 # sshd fix
 RUN mkdir -p /run/sshd && chmod 0755 /run/sshd && \
-   rm -f /etc/ssh/ssh_host_* && \
-   ssh-keygen -A && \
-   chmod 600 /etc/ssh/ssh_host_*_key && \
-   chmod 644 /etc/ssh/ssh_host_*_key.pub && \
-   /usr/sbin/sshd -t
+  rm -f /etc/ssh/ssh_host_* && \
+  ssh-keygen -A && \
+  chmod 600 /etc/ssh/ssh_host_*_key && \
+  chmod 644 /etc/ssh/ssh_host_*_key.pub && \
+  /usr/sbin/sshd -t
 
 # Put MOTD in .bash_aliases
 COPY .bash_aliases /home/${username}
@@ -89,7 +89,10 @@ RUN set -eux; \
 RUN git clone --branch avery-2025.3 https://${gt}@github.com/MarekBykowski/avery_qemu.git \
   /opt/avery/2025-3/avery_qemu_env
 
-# Fix qemu release by shipping pc-bios missing together with the binary
+# Copy sample qcow to have what to get started with
+COPY core-image-cxl-sdk-cxlx86-64.rootfs.wic.qcow2 /opt/avery/2025-3
+
+# Fix qemu release by shipping pc-bios missing along with the binary
 RUN set -eux; \
     git clone --depth 1 https://github.com/qemu/qemu.git /tmp/qemu; \
     mkdir -p /opt/avery/2025-3/vics-2025.2.1/vics/tools/qemu-bundle/usr/local/share/qemu; \
@@ -100,6 +103,8 @@ RUN set -eux; \
 # Set ownership of Avery tools to the $USER as otherwise sudo is required to
 # make any changes to the Avery files
 RUN chown -v -R ${username}:${username} /opt
+
+#RUN chown -v -R ${username}:${username} /home/${username}/workdir
 
 # add my sys config files
 COPY etc /etc
@@ -120,5 +125,5 @@ RUN chown -v -R ${username}:${username} /home/${username}
 # ports
 EXPOSE 22 5900 6080
 
-# # default command
+# default command
 CMD ["/usr/bin/supervisord","-c","/etc/supervisord.conf"]

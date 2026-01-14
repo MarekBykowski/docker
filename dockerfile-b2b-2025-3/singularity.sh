@@ -21,7 +21,7 @@ build_args=(
   --build-arg uid=$(id -u)
   --build-arg password=password
   --build-arg gt="${GIT_AUTH_TOKEN}"
-  --build-arg HTTP_PROXY="$http://proxy-us.intel.com:911" \
+  --build-arg HTTP_PROXY="http://proxy-us.intel.com:911" \
   --build-arg HTTPS_PROXY="http://proxy-us.intel.com:912" \
   -f "$dockerfile"
   -t "$docker_image"
