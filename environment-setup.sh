@@ -58,9 +58,9 @@ test -f $env_config_path && {
 	echo -e "\t'source $env_config_path'\n"
 	echo "However, if you want to re-provision the ecosystem you may want to follow these steps:"
 	echo -e "1. Remove the existing container/s (if any)"
-	echo -e "\t'source /home/mbykowsx/docker-intel/environment-config && ./run.sh down'"
+	echo -e "\t'source /home/$USER/docker-intel/environment-config && ./run.sh down'"
 	echo -e "2. Remove the existing image/s (if any)"
-	echo -e "\t'source /home/mbykowsx/docker-intel/environment-config && ./run.sh rmi'"
+	echo -e "\t'source /home/$USER/docker-intel/environment-config && ./run.sh rmi'"
 	echo -e "3. Re-create the setup script:"
 	echo -e "\t'rm -f $env_config_path && source $env_setup_path'"
 	return 127
