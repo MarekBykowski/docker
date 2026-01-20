@@ -1,9 +1,9 @@
 services:
-  b2b:
+  b2b-2023-1215:
     image: ${D_USER:?error}-b2b:ubuntu
     container_name: ${D_USER:?error}-b2b
     build:
-      context: ./dockerfile-b2b
+      context: ./dockerfile-b2b-2023-1215
       dockerfile: Dockerfile-b2b
       #entitlements:
       #- security.insecure
@@ -21,12 +21,12 @@ services:
         - /lib/modules:/lib/modules
         - /boot:/boot
     ports:
-      - '${D_B2B_SSH_PORT:?error}:22'
-      - '${D_B2B_VNC_PORT:?error}:5900'
-      - '${D_B2B_NOVNC_PORT:?error}:6080'
+      - '${D_B2B_2023_1215_SSH_PORT:?error}:22'
+      - '${D_B2B_2023_1215_VNC_PORT:?error}:5900'
+      - '${D_B2B_2023_1215_NOVNC_PORT:?error}:6080'
     privileged: true
     hostname: b2b
-    profiles: ["b2b"] # Same name as the service
+    profiles: ["b2b-2023-1215"] # Same name as the service
     networks:
       - network-b2b-yocto-ci-at-all
     #stdin_open: true # docker run -i

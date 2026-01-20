@@ -5,6 +5,7 @@
 # https://docs.docker.com/compose/how-tos/profiles/
 
 CF=compose_multiple_container_selection.yml
+CF=compose.yml
 selected_services=($(docker compose -f $CF config --services))
 echo Inspection for all of your services: ${selected_services[@]}
 if [[ $1 == up ]]; then
@@ -14,7 +15,7 @@ if [[ $1 == up ]]; then
 	# No cache does the pristine build even though the images are already build.
 	# Uncomment the line with "--no-cache" only when needed
 	docker compose -f ${CF} build --no-cache --progress=plain | tee -a docker-compose.log
-	docker compose -f ${CF} up -d | tee -a docker-compose.log
+	docker compose -f ${CF} up | tee -a docker-compose.log
 	#docker compose --progress=plain -f ${CF} up | tee -a docker-compose.log
 	#docker compose --progress=plain -f ${CF} up --build | tee -a docker-compose.log
 	#COMPOSE_PROFILE=${ARGS[@]} docker compose --progress=plain -f ${CF} up --build | tee -a docker-compose.log

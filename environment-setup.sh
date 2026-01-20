@@ -81,11 +81,11 @@ echo "export COMPOSE_PROJECT_NAME=$COMPOSE_PROJECT_NAME" >> $env_config_path
 
 # All the services use a service profiles. Read more here https://docs.docker.com/compose/how-tos/profiles/
 # Compose file
-CF=compose_b2b_yocto-ci_at_all.yml
+#CF=compose_b2b_yocto-ci_at_all.yml
 
 # Find all the services defined
 #all_services=($(docker compose --profile "*" -f $CF config --services))
-all_services=(b2b b2b-2025-3 yocto-ci generic yocto tdx)
+all_services=(b2b-2023-1215 b2b-2025-3 yocto-ci generic yocto tdx)
 echo "Available services:"
 for i in "${!all_services[@]}"; do
 	echo "$((i+1))) ${all_services[i]}"
@@ -126,6 +126,18 @@ echo "You selected: ${selected_services[@]}"
 
 echo -e "\necho \"Your Docker eco-system will run the following services (containers): ${selected_services[@]}\"" >> $env_config_path
 echo "export COMPOSE_PROFILES=$COMPOSE_PROFILES" >> $env_config_path
+
+
+# Generate Dockerfile from fragments ONLY for b2b*
+for e in "${selected_services[@]}"; do
+	echo $e
+	if [[ "$e" == b2b* ]]; then
+		echo "Assembliung Dockerfile for B2B"
+		`dirname ${BASH_SOURCE[0]}`/dockerfile-b2b/assemble.sh 2023-1215
+		`dirname ${BASH_SOURCE[0]}`/dockerfile-b2b/assemble.sh 2025-3
+		break
+	fi
+done
 
 # Ports must be unique system-wise and ideally remain unchanged to the end of life of containeres.
 # The algorithm for assigning the ports is in a 'port-assignment.sh' file.
