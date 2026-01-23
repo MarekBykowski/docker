@@ -33,7 +33,7 @@ COPY apt.conf /etc/apt/
 
 # included: /home/mbykowsx/docker-intel/dockerfile-b2b/dockerfile.inc/20-common-tools.inc
 # ALL shared apt packages
-RUN apt-get update -y && \
+RUN apt-get -o Acquire::Retries=5 update && \
   # esentially Yocto tools
   apt-get install -y build-essential chrpath cpio debianutils diffstat \
     file gawk gcc iputils-ping libacl1 liblz4-tool python3 python3-git \
@@ -79,7 +79,11 @@ COPY .bash_aliases /home/${username}
 RUN mkdir -p /opt/avery/2025-3
 COPY cxlvs-2025.3.tgz vics-2025.2.1.tgz \
   vip-2025.3.tgz verdi.tar.gz vcsmx.tar.gz /tmp
-RUN for f in /tmp/*.tar.gz /tmp/*.tgz; do tar -xzf $f -C /opt/avery/2025-3 && rm $f; done
+#RUN for f in /tmp/*.tar.gz /tmp/*.tgz; do tar -xzf $f -C /opt/avery/2025-3 && rm $f; done
+RUN for f in /tmp/*.tar.gz /tmp/*.tgz; do \
+  [ -e "$f" ] || continue; \
+    tar -xf "$f" -C /opt/avery/2025-3 && rm -f "$f"; \
+  done
 
 # apciexactor-gen7* is a special case: it needs to be extracted to /opt/avery/2025-3/vip-2025.3
 COPY apciexactor-gen7_2025_2_0814_cbe30abcfb.cxl.dmi.lpif.tar.gz /tmp

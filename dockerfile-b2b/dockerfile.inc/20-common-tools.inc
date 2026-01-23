@@ -1,5 +1,5 @@
 # ALL shared apt packages
-RUN apt-get update -y && \
+RUN apt-get -o Acquire::Retries=5 update && \
   # esentially Yocto tools
   apt-get install -y build-essential chrpath cpio debianutils diffstat \
     file gawk gcc iputils-ping libacl1 liblz4-tool python3 python3-git \

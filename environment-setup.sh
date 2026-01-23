@@ -85,7 +85,7 @@ echo "export COMPOSE_PROJECT_NAME=$COMPOSE_PROJECT_NAME" >> $env_config_path
 
 # Find all the services defined
 #all_services=($(docker compose --profile "*" -f $CF config --services))
-all_services=(b2b-2023-1215 b2b-2025-3 yocto-ci generic yocto tdx)
+all_services=(b2b-2023-1215 b2b-2025-3 b2b-2023-cosim yocto-ci generic yocto tdx)
 echo "Available services:"
 for i in "${!all_services[@]}"; do
 	echo "$((i+1))) ${all_services[i]}"
@@ -135,6 +135,7 @@ for e in "${selected_services[@]}"; do
 		echo "Assembliung Dockerfile for B2B"
 		`dirname ${BASH_SOURCE[0]}`/dockerfile-b2b/assemble.sh 2023-1215
 		`dirname ${BASH_SOURCE[0]}`/dockerfile-b2b/assemble.sh 2025-3
+		`dirname ${BASH_SOURCE[0]}`/dockerfile-b2b/assemble.sh 2023-cosim
 		break
 	fi
 done

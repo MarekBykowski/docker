@@ -33,7 +33,7 @@ COPY apt.conf /etc/apt/
 
 # included: /home/mbykowsx/docker-intel/dockerfile-b2b/dockerfile.inc/20-common-tools.inc
 # ALL shared apt packages
-RUN apt-get update -y && \
+RUN apt-get -o Acquire::Retries=5 update && \
   # esentially Yocto tools
   apt-get install -y build-essential chrpath cpio debianutils diffstat \
     file gawk gcc iputils-ping libacl1 liblz4-tool python3 python3-git \
@@ -76,7 +76,12 @@ COPY .bash_aliases /home/${username}
 RUN mkdir -p /opt/avery/2023_1215
 COPY apciexactor-2.5c.cxl.tar.gz aqcxl_sim-2023_1215.tar.gz \
   avery_pli-2023_1128.tar.gz verdi.tar.gz vcsmx.tar.gz /tmp
-RUN for f in /tmp/*.tar.gz; do tar -xzf $f -C /opt/avery/2023_1215 && rm $f; done
+#RUN for f in /tmp/*.tar.gz; do tar -xzf $f -C /opt/avery/2023_1215 && rm $f; done
+RUN for f in /tmp/*.tar.gz /tmp/*.tgz; do \
+  [ -e "$f" ] || continue; \
+    tar -xf "$f" -C /opt/avery/2023_1215 && rm -f "$f"; \
+  done
+
 
 RUN git clone --branch avery-2023_1215 https://${gt}@github.com/MarekBykowski/avery_qemu.git \
   /opt/avery/2023_1215/avery_qemu_env

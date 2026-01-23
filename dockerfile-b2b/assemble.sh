@@ -6,7 +6,7 @@ set -euo pipefail
 variant="$1"
 
 case $variant in
-	2023-1215|2025-3)
+	2023-1215|2025-3|2023-cosim)
 		:
 		;;
 	*)
