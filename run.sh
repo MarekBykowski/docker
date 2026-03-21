@@ -8,18 +8,14 @@ CF=compose_multiple_container_selection.yml
 CF=compose.yml
 selected_services=($(docker compose -f $CF config --services))
 echo Inspection for all of your services: ${selected_services[@]}
-if [[ $1 == up ]]; then
+if [[ $1 == build ]]; then
 	mkdir -p workdir
-	# Create bind mount workdir directory
 	test -f docker-compose.log && rm -f docker-compose.log
-	# No cache does the pristine build even though the images are already build.
-	# Uncomment the line with "--no-cache" only when needed
+	# --no-cache forces build even though the images are already build
 	docker compose -f ${CF} build --no-cache --progress=plain | tee -a docker-compose.log
-	docker compose -f ${CF} up -d | tee -a docker-compose.log
-	#docker compose --progress=plain -f ${CF} up | tee -a docker-compose.log
-	#docker compose --progress=plain -f ${CF} up --build | tee -a docker-compose.log
-	#COMPOSE_PROFILE=${ARGS[@]} docker compose --progress=plain -f ${CF} up --build | tee -a docker-compose.log
-	#docker compose -f ${CF} up -d
+elif [[ $1 == up ]]; then
+	docker compose -f ${CF} up -d
+>>>>>>> 89ccac1 (Cherry pick it to fragments)
 elif [[ $1 == down ]]; then
 	docker compose -f ${CF} down --volumes
 	rm -rf workdir
@@ -56,8 +52,6 @@ elif [[ $1 == push ]]; then
 	done
 else
 	cat <<-EOF
-	$0 <up|down|rmi|ps|config|commit|push>
+	$0 <build|up|down|stop|rmi|ps|config|commit|push>
 	EOF
 fi
-
-

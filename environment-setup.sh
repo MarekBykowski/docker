@@ -17,6 +17,10 @@
 # grant the required entitlements using the --allow flag.
 #export BUILDX_BUILDER=secure-builder; echo "Using BuildKit daemon: $BUILDX_BUILDER"
 
+# Find all the services defined
+#all_services=($(docker compose --profile "*" -f $CF config --services))
+all_services=(b2b-2023-1215 b2b-2025-3 b2b-2025-3-ubuntu-24.04 b2b-2023-cosim yocto-ci generic yocto tdx)
+
 if [[ "$0" == "$BASH_SOURCE" ]]; then
 	echo "Error: This script needs to be sourced. Please run as 'source $BASH_SOURCE'" >&2
 	exit 1
@@ -83,9 +87,6 @@ echo "export COMPOSE_PROJECT_NAME=$COMPOSE_PROJECT_NAME" >> $env_config_path
 # Compose file
 #CF=compose_b2b_yocto-ci_at_all.yml
 
-# Find all the services defined
-#all_services=($(docker compose --profile "*" -f $CF config --services))
-all_services=(b2b-2023-1215 b2b-2025-3 b2b-2023-cosim yocto-ci generic yocto tdx)
 echo "Available services:"
 for i in "${!all_services[@]}"; do
 	echo "$((i+1))) ${all_services[i]}"
@@ -135,6 +136,7 @@ for e in "${selected_services[@]}"; do
 		echo "Assembliung Dockerfile for B2B"
 		`dirname ${BASH_SOURCE[0]}`/dockerfile-b2b/assemble.sh 2023-1215
 		`dirname ${BASH_SOURCE[0]}`/dockerfile-b2b/assemble.sh 2025-3
+		`dirname ${BASH_SOURCE[0]}`/dockerfile-b2b/assemble.sh 2025-3-ubuntu-24.04
 		`dirname ${BASH_SOURCE[0]}`/dockerfile-b2b/assemble.sh 2023-cosim
 		break
 	fi
@@ -180,10 +182,9 @@ echo "Ports allocated: ${ports[@]}"
 
 for ((i=0,j=0; i<${#selected_services[@]}; i++)); do
 	service=${selected_services[$i]}
-	# Convert to UPPERCASE
-	SERVICE=${service^^}
-	# Convert all dashes (-) to underscores (_)
-	SERVICE=${SERVICE//-/_}
+	SERVICE=${service^^}	# Convert to UPPERCASE
+	SERVICE=${SERVICE//-/_}	# replce - with _
+	SERVICE=${SERVICE//./_}	# replce . with _
 
 	# i is a service
 	# j is a protocol incrementing the service by:

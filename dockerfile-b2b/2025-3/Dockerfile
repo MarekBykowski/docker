@@ -1,4 +1,4 @@
-# included: /home/mbykowsx/docker-intel/dockerfile-b2b/dockerfile.inc/00-base.inc
+# included (default): /home/mbykowsx/docker-intel/dockerfile-b2b/dockerfile.inc/00-base.inc
 FROM ubuntu:20.04
 
 ARG username
@@ -27,11 +27,11 @@ RUN groupadd --gid "${gid}" "${username}" && \
   usermod -a -G sudo "${username}" && \
   usermod -a -G kvm  "${username}"; \
   echo "${username}:${password}" | chpasswd
-# included: /home/mbykowsx/docker-intel/dockerfile-b2b/dockerfile.inc/10-apt-intel.inc
+# included (default): /home/mbykowsx/docker-intel/dockerfile-b2b/dockerfile.inc/10-apt-intel.inc
 # This apt-conf includes the http proxy used in Intel. Run it only for Intel.
 COPY apt.conf /etc/apt/
 
-# included: /home/mbykowsx/docker-intel/dockerfile-b2b/dockerfile.inc/20-common-tools.inc
+# included (default): /home/mbykowsx/docker-intel/dockerfile-b2b/dockerfile.inc/20-common-tools.inc
 # ALL shared apt packages
 RUN apt-get -o Acquire::Retries=5 update && \
   # esentially Yocto tools
@@ -55,11 +55,11 @@ RUN apt-get -y update && apt-get -y install firefox
 # install gh. in Ubuntu 20.04 it is not in apt
 COPY gh_2.69.0_linux_amd64.deb /home/${username}
 RUN dpkg -i /home/${username}/gh_2.69.0_linux_amd64.deb
-# included: /home/mbykowsx/docker-intel/dockerfile-b2b/2025-3/30-variant-tools.inc
+# included (variant override): /home/mbykowsx/docker-intel/dockerfile-b2b/2025-3/30-variant-tools.inc
 # Updated b2b 2025-3 requires on top
 RUN apt-get update -y && \
   apt-get install -y libncurses5 libncursesw5 iproute2
-# included: /home/mbykowsx/docker-intel/dockerfile-b2b/dockerfile.inc/40-config.inc
+# included (default): /home/mbykowsx/docker-intel/dockerfile-b2b/dockerfile.inc/40-config.inc
 # sshd setup
 RUN mkdir -p /run/sshd && chmod 0755 /run/sshd && \
    rm -f /etc/ssh/ssh_host_* && \
@@ -71,7 +71,7 @@ RUN mkdir -p /run/sshd && chmod 0755 /run/sshd && \
 # Shell behaviour: make /bin/sh symlink to bash instead of dash
 RUN echo "dash dash/sh boolean false" | debconf-set-selections
 RUN DEBIAN_FRONTEND=noninteractive dpkg-reconfigure dash
-# included: /home/mbykowsx/docker-intel/dockerfile-b2b/2025-3/50-siemens-tools.inc
+# included (variant override): /home/mbykowsx/docker-intel/dockerfile-b2b/2025-3/50-siemens-tools.inc
 # Put MOTD in .bash_aliases. MOTD is variant sepcific.
 COPY .bash_aliases /home/${username}
 
@@ -111,7 +111,7 @@ RUN set -eux; \
        /opt/avery/2025-3/vics-2025.2.1/vics/tools/qemu-bundle/usr/local/share/qemu/; \
     rm -rf /tmp/qemu
 
-# included: /home/mbykowsx/docker-intel/dockerfile-b2b/dockerfile.inc/60-user-env-ux.inc
+# included (default): /home/mbykowsx/docker-intel/dockerfile-b2b/dockerfile.inc/60-user-env-ux.inc
 # User  env & UX
 # terminal
 COPY config/xfce4/terminal/terminalrc /home/${username}/.config/xfce4/terminal/terminalrc
@@ -122,7 +122,7 @@ COPY config/xfce4/xfconf/xfce-perchannel-xml/xsettings.xml /home/${username}/.co
 
 # add my sys config files
 COPY etc /etc
-# included: /home/mbykowsx/docker-intel/dockerfile-b2b/dockerfile.inc/70-ownership.inc
+# included (default): /home/mbykowsx/docker-intel/dockerfile-b2b/dockerfile.inc/70-ownership.inc
 # Claim ownership
 RUN chown -v -R ${username}:${username} /home/${username}
 
@@ -130,7 +130,7 @@ RUN chown -v -R ${username}:${username} /home/${username}
 # changes to Avery files, including git
 RUN chown -v -R ${username}:${username} /opt
 
-# included: /home/mbykowsx/docker-intel/dockerfile-b2b/dockerfile.inc/90-runtime.inc
+# included (default): /home/mbykowsx/docker-intel/dockerfile-b2b/dockerfile.inc/90-runtime.inc
 # ports
 EXPOSE 22 5900 6080
 
