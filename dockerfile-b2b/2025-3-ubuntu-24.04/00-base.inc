@@ -6,6 +6,8 @@ ARG uid
 ARG password
 ARG gt
 
+RUN cat /etc/os-release
+
 # default screen size
 ENV XRES=1280x800x24
 

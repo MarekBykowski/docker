@@ -8,14 +8,19 @@ CF=compose_multiple_container_selection.yml
 CF=compose.yml
 selected_services=($(docker compose -f $CF config --services))
 echo Inspection for all of your services: ${selected_services[@]}
+
 if [[ $1 == build ]]; then
 	mkdir -p workdir
 	test -f docker-compose.log && rm -f docker-compose.log
-	# --no-cache forces build even though the images are already build
-	docker compose -f ${CF} build --no-cache --progress=plain | tee -a docker-compose.log
+	if [[ -n "$2" ]]; then
+		docker compose -f ${CF} build --pull --no-cache "$2" --progress=plain | tee -a docker-compose.log
+	else
+		# --no-cache forces build even though the images are already build
+		#docker compose -f ${CF} build --no-cache --progress=plain | tee -a docker-compose.log
+		docker compose -f ${CF} build --progress=plain | tee -a docker-compose.log
+	fi
 elif [[ $1 == up ]]; then
 	docker compose -f ${CF} up -d
->>>>>>> 89ccac1 (Cherry pick it to fragments)
 elif [[ $1 == down ]]; then
 	docker compose -f ${CF} down --volumes
 	rm -rf workdir

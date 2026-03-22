@@ -7,6 +7,8 @@ ARG uid
 ARG password
 ARG gt
 
+RUN cat /etc/os-release
+
 # default screen size
 ENV XRES=1280x800x24
 
@@ -31,34 +33,37 @@ RUN groupadd --gid "${gid}" "${username}" && \
 # This apt-conf includes the http proxy used in Intel. Run it only for Intel.
 COPY apt.conf /etc/apt/
 
-# included (default): /home/mbykowsx/docker-intel/dockerfile-b2b/dockerfile.inc/20-common-tools.inc
+# included (variant override): /home/mbykowsx/docker-intel/dockerfile-b2b/2025-3-ubuntu-24.04/20-common-tools.inc
 # ALL shared apt packages
 RUN apt-get -o Acquire::Retries=5 update && \
   # esentially Yocto tools
-  apt-get install -y build-essential chrpath cpio debianutils diffstat \
-    file gawk gcc iputils-ping libacl1 liblz4-tool python3 python3-git \
-    locales python3-jinja2 python3-pexpect python3-pip python3-subunit \
-    socat texinfo unzip  wget xz-utils zstd && \
-  # others
-  apt-get install -y sudo vim tmux gzip unzip git cpu-checker perl \
-    libterm-readkey-perl libpixman-1-0 libpixman-1-dev libglib2.0-0 && \
+  apt-get -y update && apt-get -y install build-essential chrpath cpio debianutils diffstat file gawk \
+    gcc iputils-ping libacl1 liblz4-tool python3 python3-git locales \
+    python3-jinja2 python3-pexpect python3-pip python3-subunit socat texinfo unzip \
+    wget xz-utils zstd iproute2 && \
+  apt-get -y install sudo vim tmux gzip unzip git cpu-checker  perl libterm-readkey-perl \
+    libpixman-1-0 libpixman-1-dev  libglib2.0-0 && \
   # required from sv
-  apt-get install -y dc time libelf1 && \
+  apt-get -y install dc time libelf1 && \
+  # install kmod (modprobe) gh, slirp, libslirp, etc.
+  apt-get install -y kmod gh libslirp-dev sphinx-basic-ng python3-sphinx-rtd-theme \
+    ninja-build pkg-config libglib2.0-dev && \
+  # install remaining build dependencies for pciutils 3.13+ installed from repo (note ubuntu has 3.10)
+  apt-get install -y libpci-dev && \
   # install GUI, vnc, novnc
   apt-get install -y --no-install-recommends apt-utils sudo supervisor vim \
-   openssh-server xserver-xorg xvfb x11vnc dbus-x11 xfce4 \
-   xfce4-terminal xfce4-xkb-plugin novnc websockify
+    openssh-server \
+    xserver-xorg xvfb x11vnc dbus-x11 xfce4 \
+    xfce4-terminal xfce4-xkb-plugin \
+    novnc websockify
 
 # Install firefox
 RUN apt-get -y update && apt-get -y install firefox
-
-# install gh. in Ubuntu 20.04 it is not in apt
-COPY gh_2.69.0_linux_amd64.deb /home/${username}
-RUN dpkg -i /home/${username}/gh_2.69.0_linux_amd64.deb
 # included (variant override): /home/mbykowsx/docker-intel/dockerfile-b2b/2025-3-ubuntu-24.04/30-variant-tools.inc
 # Updated b2b 2025-3 requires on top
+# Ubuntu 24.04 has libncur*6 version 6
 RUN apt-get update -y && \
-  apt-get install -y libncurses5 libncursesw5 iproute2
+  apt-get install -y libncurses6 libncursesw6 iproute2
 # included (default): /home/mbykowsx/docker-intel/dockerfile-b2b/dockerfile.inc/40-config.inc
 # sshd setup
 RUN mkdir -p /run/sshd && chmod 0755 /run/sshd && \

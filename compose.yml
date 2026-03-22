@@ -67,6 +67,40 @@ services:
     #stdin_open: true # docker run -i
     #tty: true        # docker run -t
 
+  b2b-2025-3-ubuntu-24.04:
+    image: ${D_USER:?error}-b2b-2025-3-ubuntu-24.04:ubuntu
+    container_name: ${D_USER:?error}-b2b-2025-3-ubuntu-24.04
+    build:
+      context: ./dockerfile-b2b/2025-3-ubuntu-24.04
+      #dockerfile: Dockerfile-b2b-2025-3-ubuntu-24.04
+      #entitlements:
+      #- security.insecure
+      #no_cache: true
+      args:
+        - username=${D_USER:?error}
+        - gid=${D_GID:?error}
+        - uid=${D_UID:?error}
+        - password=${D_PASSWORD:?error}
+        - gt=${GIT_AUTH_TOKEN:?error}
+        - HTTP_PROXY=${D_HTTP_PROXY:?error}
+        - HTTPS_PROXY=${D_HTTPS_PROXY:?error}
+    volumes:
+        - ${D_HOME:?error}:${D_HOME:?error}/host
+        - $PWD/workdir:/home/mbykowsx/workdir   # <- We work from workdir
+        - /lib/modules:/lib/modules
+        - /boot:/boot
+    ports:
+      - '${D_B2B_2025_3_UBUNTU_24_04_SSH_PORT:?ERROR}:22'
+      - '${D_B2B_2025_3_UBUNTU_24_04_VNC_PORT:?error}:5900'
+      - '${D_B2B_2025_3_UBUNTU_24_04_NOVNC_PORT:?error}:6080'
+    privileged: true
+    hostname: b2b-2025-3-ubuntu-24.04
+    profiles: ["b2b-2025-3-ubuntu-24.04"] # Same name as the service
+    networks:
+      - network-b2b-yocto-ci-at-all
+    #stdin_open: true # docker run -i
+    #tty: true        # docker run -t
+
   2023-cosim:
     image: ${D_USER:?error}-b2b-2023-cosim:ubuntu
     container_name: ${D_USER:?error}-b2b-2023-cosim
