@@ -21,9 +21,19 @@ if [[ $1 == build ]]; then
 	fi
 elif [[ $1 == up ]]; then
 	docker compose -f ${CF} up -d
+elif [[ $1 == stop ]]; then
+	docker compose -f ${CF} stop
 elif [[ $1 == down ]]; then
-	docker compose -f ${CF} down --volumes
-	rm -rf workdir
+	echo
+	echo "'$0 $1' makes container deleted -> changes lost."
+	echo "Running '$0 up|stop' preserves the content."
+	read -p "Are you sure you want to continue? [y/n]: " answer
+	if [[ "$answer" == "y" || "$answer" == "Y" ]]; then
+		docker compose -f ${CF} down --volumes
+		rm -rf workdir
+	else
+		echo "Aborted."
+	fi
 elif [[ $1 == rmi ]]; then
 	for t in `docker compose -f ${CF} config | grep image: | awk '{print $2}'`; do
 		echo "docker rmi $t"
