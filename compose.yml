@@ -18,7 +18,7 @@ services:
         - HTTPS_PROXY=${D_HTTPS_PROXY:?error}
     volumes:
         - ${D_HOME:?error}:${D_HOME:?error}/host
-        - $PWD/workdir:/home/mbykowsx/workdir   # <- We work from workdir
+        - $PWD/workdir:/home/${D_HOME:?error}/workdir   # <- We work from workdir
         - /lib/modules:/lib/modules
         - /boot:/boot
     ports:
@@ -52,7 +52,7 @@ services:
         - HTTPS_PROXY=${D_HTTPS_PROXY:?error}
     volumes:
         - ${D_HOME:?error}:${D_HOME:?error}/host
-        - $PWD/workdir:/home/mbykowsx/workdir   # <- We work from workdir
+        - $PWD/workdir:/home/${D_HOME:?error}/workdir   # <- We work from workdir
         - /lib/modules:/lib/modules
         - /boot:/boot
     ports:
@@ -86,7 +86,7 @@ services:
         - HTTPS_PROXY=${D_HTTPS_PROXY:?error}
     volumes:
         - ${D_HOME:?error}:${D_HOME:?error}/host
-        - $PWD/workdir:/home/mbykowsx/workdir   # <- We work from workdir
+        - $PWD/workdir:/home/${D_HOME:?error}/workdir   # <- We work from workdir
         - /lib/modules:/lib/modules
         - /boot:/boot
     ports:
@@ -120,7 +120,7 @@ services:
         - HTTPS_PROXY=${D_HTTPS_PROXY:?error}
     volumes:
         - ${D_HOME:?error}:${D_HOME:?error}/host
-        - $PWD/workdir:/home/mbykowsx/workdir   # <- We work from workdir
+        - $PWD/workdir:/home/${D_HOME:?error}/workdir   # <- We work from workdir
         - /lib/modules:/lib/modules
         - /boot:/boot
     ports:
