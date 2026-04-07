@@ -3,3 +3,5 @@
 *log
 *qcow2*
 *tgz
+environment-config
+dockerfile-b2b/*/Dockerfile
