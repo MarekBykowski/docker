@@ -3,7 +3,7 @@ COPY .bash_aliases /home/${username}
 
 # Install b2b tools
 RUN mkdir -p /opt/avery/2025-3
-COPY cxlvs-2025.3.tgz vics-2025.2.1.tgz \
+COPY cxlvs-2025.3.tgz vics-2025.2.1.tgz 2026.1.tgz \
   vip-2025.3.tgz verdi.tar.gz vcsmx.tar.gz /tmp
 RUN for f in /tmp/*.tar.gz /tmp/*.tgz; do \
   [ -e "$f" ] || continue; \

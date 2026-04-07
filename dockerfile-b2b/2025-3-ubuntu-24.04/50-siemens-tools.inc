@@ -3,7 +3,7 @@ COPY .bash_aliases /home/${username}
 
 # Install b2b tools
 RUN mkdir -p /opt/avery/2025-3
-COPY cxlvs-2025.3.tgz vics-2025.2.1.tgz \
+COPY cxlvs-2025.3.tgz vics-2025.2.1.tgz 2026.1.tgz \
   vip-2025.3.tgz verdi.tar.gz vcsmx.tar.gz /tmp
 RUN for f in /tmp/*.tar.gz /tmp/*.tgz; do \
   [ -e "$f" ] || continue; \
@@ -30,9 +30,14 @@ RUN set -eux; \
 
 # Fix qemu release by shipping pc-bios missing along with the binary
 RUN set -eux; \
-    git clone --depth 1 https://github.com/qemu/qemu.git /tmp/qemu; \
-    mkdir -p /opt/avery/2025-3/vics-2025.2.1/vics/tools/qemu-bundle/usr/local/share/qemu; \
-    cp -r /tmp/qemu/pc-bios/* \
-       /opt/avery/2025-3/vics-2025.2.1/vics/tools/qemu-bundle/usr/local/share/qemu/; \
-    rm -rf /tmp/qemu
+    git clone --depth 1 https://github.com/qemu/qemu.git /tmp/qemu && \
+    cp -rf /tmp/qemu/pc-bios /opt/avery/2025-3/; rm -rf /tmp/qemu
+
+# Fix qemu release by shipping pc-bios missing along with the binary
+#RUN set -eux; \
+#    git clone --depth 1 https://github.com/qemu/qemu.git /tmp/qemu; \
+#    mkdir -p /opt/avery/2025-3/vics-2025.2.1/vics/tools/qemu-bundle/usr/local/share/qemu; \
+#    cp -r /tmp/qemu/pc-bios/* \
+#       /opt/avery/2025-3/vics-2025.2.1/vics/tools/qemu-bundle/usr/local/share/qemu/; \
+#    rm -rf /tmp/qemu
 
