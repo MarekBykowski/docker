@@ -5,7 +5,6 @@ COPY .bash_aliases /home/${username}
 RUN mkdir -p /opt/avery/2025-3
 COPY cxlvs-2025.3.tgz vics-2025.2.1.tgz \
   vip-2025.3.tgz verdi.tar.gz vcsmx.tar.gz /tmp
-#RUN for f in /tmp/*.tar.gz /tmp/*.tgz; do tar -xzf $f -C /opt/avery/2025-3 && rm $f; done
 RUN for f in /tmp/*.tar.gz /tmp/*.tgz; do \
   [ -e "$f" ] || continue; \
     tar -xf "$f" -C /opt/avery/2025-3 && rm -f "$f"; \
