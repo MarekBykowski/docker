@@ -36,6 +36,7 @@ services:
   b2b-2025-3:
     image: ${D_USER:?error}-b2b-2025-3:ubuntu
     container_name: ${D_USER:?error}-b2b-2025-3
+    restart: unless-stopped
     build:
       context: ./dockerfile-b2b/2025-3
       #dockerfile: Dockerfile-b2b-2025-3
@@ -70,6 +71,7 @@ services:
   b2b-2025-3-ubuntu-24.04:
     image: ${D_USER:?error}-b2b-2025-3-ubuntu-24.04:ubuntu
     container_name: ${D_USER:?error}-b2b-2025-3-ubuntu-24.04
+    restart: unless-stopped
     build:
       context: ./dockerfile-b2b/2025-3-ubuntu-24.04
       #dockerfile: Dockerfile-b2b-2025-3-ubuntu-24.04
@@ -249,6 +251,7 @@ services:
   tdx:
     image: ${D_USER:?error}-tdx:ubuntu
     container_name: ${D_USER:?error}-tdx
+    restart: unless-stopped
     build:
       context: ./dockerfile-tdx-ubuntu-24.04
       dockerfile: Dockerfile-tdx
