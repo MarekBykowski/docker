@@ -275,12 +275,12 @@ COMMENT
 
 cat << EOF >> $env_config_path
 export GIT_AUTH_TOKEN="g\
-hp_FU32\
-vNbprc3\
-KsnZKm\
-Nmbloh\
-oXBE4x\
-D0Sb6ng"
+ithub_pat_\
+11AB2NRVQ0tJF6RP\
+Ivro0V_mqzpvNMzK\
+3c1hWNTa9WfuLD4\
+yomQmQe1fkeE2\
+JO9rgOP6XV7ZFZ0f8Rc6wv"
 EOF
 
 source $env_config_path
